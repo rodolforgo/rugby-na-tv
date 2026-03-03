@@ -1,0 +1,51 @@
+{
+  "name": "rugby-na-tv",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run docker:up && next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "biome check",
+    "format": "biome format --write",
+    "docker:up": "docker compose -f infra/compose.yml up -d",
+    "docker:down": "docker compose -f infra/compose.yml down",
+    "test": "npm run docker:up && concurrently --names next,jest --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose\" && npm run docker:down",
+    "test:watch": "jest --watchAll --runInBand",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:drop": "drizzle-kit drop"
+  },
+  "dependencies": {
+    "@auth/drizzle-adapter": "^1.11.1",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.2.3",
+    "dotenv-expand": "^12.0.3",
+    "drizzle-orm": "^0.45.1",
+    "next": "16.0.10",
+    "next-auth": "^4.24.13",
+    "pg": "^8.16.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.7",
+    "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.16.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
+    "drizzle-kit": "^0.31.8",
+    "jest": "^30.2.0",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "zod": "^4.2.1"
+  }
+}
