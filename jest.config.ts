@@ -16,5 +16,4 @@ const config: Config = {
   testTimeout: 60000,
 };
 
-
 export default createJestConfig(config);
