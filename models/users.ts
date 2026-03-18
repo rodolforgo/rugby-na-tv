@@ -14,6 +14,10 @@ async function validateUniqueEmail(email: string) {
   }
 }
 
+async function getAllUsers() {
+  return await db.query.usersSchema.findMany();
+}
+
 async function createNewUser(userInputValues: CreateUserSchema) {
   await validateUniqueEmail(userInputValues.email);
 
@@ -29,6 +33,6 @@ async function createNewUser(userInputValues: CreateUserSchema) {
   return newUser[0];
 }
 
-const users = { validateUniqueEmail, createNewUser };
+const users = { validateUniqueEmail, createNewUser, getAllUsers };
 
 export default users;
