@@ -5,6 +5,12 @@ import validator from "@/models/validator";
 import { createUserSchema } from "@/domain/users/users.schema";
 import users from "@/models/users";
 
+export const GET = controller.errorHandler(async () => {
+  const allUsers = await users.getAllUsers();
+
+  return NextResponse.json(allUsers, { status: 200 });
+});
+
 export const POST = controller.errorHandler(async (req) => {
   const body = await req.json();
 
