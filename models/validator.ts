@@ -1,7 +1,7 @@
 import { ValidationError } from "@/infra/errors";
 import type { z } from "zod";
 
-function validateBody(schema: z.ZodType<T>, body: unknown) {
+function validateBody<T>(schema: z.ZodType<T>, body: unknown) {
   const parsedBody = schema.safeParse(body);
 
   if (!parsedBody.success) {
