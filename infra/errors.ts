@@ -48,6 +48,15 @@ export class ValidationError extends CustomError {
   }
 }
 
+export class UnauthorizedError extends CustomError {
+  constructor(message?: string) {
+    super(message || "Credenciais inválidas.", {
+      action: "Verifique o e-mail e a senha informados.",
+      statusCode: 401,
+    });
+  }
+}
+
 export class ServiceError extends CustomError {
   constructor() {
     super("Serviço indisponível no momento.", {
