@@ -1,5 +1,6 @@
 import { runQueryClient } from "@/infra/database/client";
 import migrator from "@/models/migrator";
+import users from "@/models/users";
 
 export async function waitWebServer() {
   await fetchStatusPage();
@@ -22,4 +23,13 @@ export async function cleanDb() {
 
 export async function runMigrations() {
   await migrator.runMigrations();
+}
+
+export async function createTestUser(options?: { email?: string; password?: string }) {
+  const email = options?.email || `user_${crypto.randomUUID()}@email.com`;
+  const password = options?.password || "Password123!";
+
+  const user = await users.createNewUser({ email, password });
+
+  return { ...user, rawPassword: password };
 }
