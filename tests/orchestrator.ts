@@ -28,8 +28,8 @@ export async function runMigrations() {
 export async function createTestUser(options?: { email?: string; password?: string }) {
   const email = options?.email || `user_${crypto.randomUUID()}@email.com`;
   const password = options?.password || "Password123!";
-  
+
   const user = await users.createNewUser({ email, password });
-  
+
   return { ...user, rawPassword: password };
 }
