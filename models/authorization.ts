@@ -3,6 +3,7 @@ import { usersSchema } from "@/infra/database/schema/users";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
+import { UnauthorizedError } from "@/infra/errors";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
@@ -48,6 +49,14 @@ const { handlers, auth, signIn, signOut } = NextAuth({
   },
 });
 
-const authorization = { handlers, auth, signIn, signOut };
+async function verifyPassword(plain: string, hashed: string) {
+  const passwordMatch = await bcrypt.compare(plain, hashed);
+
+  if (!passwordMatch) {
+    throw new UnauthorizedError();
+  }
+}
+
+const authorization = { handlers, auth, signIn, signOut, verifyPassword };
 
 export default authorization;
