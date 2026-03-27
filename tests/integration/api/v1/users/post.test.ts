@@ -31,6 +31,8 @@ describe("POST /api/v1/users", () => {
       created_at: responseBody.created_at,
       updated_at: responseBody.updated_at,
     });
+
+    expect(responseBody.password).not.toBe("NovoUsuario!");
   });
 });
 
