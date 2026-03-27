@@ -35,10 +35,15 @@ describe("POST /api/v1/sessions", () => {
       const setCookieHeader = response.headers.get("Set-Cookie");
       expect(setCookieHeader).not.toBeNull();
 
-      const expiresMatch = setCookieHeader!.match(/Expires=([^;]+)/i);
-      expect(expiresMatch).not.toBeNull();
+      expect(setCookieHeader).not.toBeNull();
+      if (!setCookieHeader) return;
 
-      const expiresDate = new Date(expiresMatch![1]).getTime();
+      const expiresMatch = setCookieHeader.match(/Expires=([^;]+)/i);
+
+      expect(expiresMatch).not.toBeNull();
+      if (!expiresMatch) return;
+
+      const expiresDate = new Date(expiresMatch[1]).getTime();
       const diffDays = (expiresDate - Date.now()) / 1000 / 60 / 60 / 24;
       expect(diffDays).toBeGreaterThan(6.9);
       expect(diffDays).toBeLessThan(7.1);
