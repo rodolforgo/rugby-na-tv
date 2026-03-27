@@ -6,7 +6,12 @@ function errorHandler(handler: (req: Request) => Promise<Response> | Response) {
     try {
       return await handler(req);
     } catch (error) {
-      if (error instanceof ServiceError || error instanceof ValidationError || error instanceof UnauthorizedError || error instanceof MethodNotAllowedError) {
+      if (
+        error instanceof ServiceError ||
+        error instanceof ValidationError ||
+        error instanceof UnauthorizedError ||
+        error instanceof MethodNotAllowedError
+      ) {
         return new NextResponse(JSON.stringify(error), { status: error.statusCode });
       }
 
