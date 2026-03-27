@@ -1,4 +1,4 @@
-import { cleanDb, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, runMigrations, waitWebServer, createTestUser } from "@/tests/orchestrator";
 
 beforeAll(async () => {
   await waitWebServer();
@@ -9,21 +9,14 @@ beforeAll(async () => {
 describe("POST /api/v1/sessions", () => {
   describe("Usuário anônimo", () => {
     test("Cria sessão com credenciais válidas e define cookie de 7 dias", async () => {
-      await fetch("http://localhost:3000/api/v1/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: "login@email.com",
-          password: "Senha123!",
-        }),
-      });
+      const user = await createTestUser();
 
       const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: "login@email.com",
-          password: "Senha123!",
+          email: user.email,
+          password: user.rawPassword,
         }),
       });
 
@@ -69,10 +62,12 @@ describe("POST /api/v1/sessions", () => {
     });
 
     test("Retorna 401 com senha incorreta", async () => {
+      const user = await createTestUser();
+
       const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "login@email.com", password: "SenhaErrada!" }),
+        body: JSON.stringify({ email: user.email, password: "SenhaErrada!" }),
       });
 
       expect(response.status).toBe(401);
