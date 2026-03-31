@@ -11,7 +11,9 @@ async function validateUniqueEmail(email: string) {
   });
 
   if (existingUser) {
-    throw new ValidationError("O e-mail já está em uso.", { action: "Utilize outro e-mail para cadastrar o usuário." });
+    throw new ValidationError("Não foi possível concluir o cadastro.", {
+      action: "Verifique os dados informados e tente novamente."
+    });
   }
 }
 
