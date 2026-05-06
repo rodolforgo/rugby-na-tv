@@ -21,6 +21,7 @@ export const POST = controller.errorHandler(async (req) => {
   const newUser = await users.createNewUser(body);
 
   const token = await emailVerification.createVerificationToken(newUser.email);
+  await users.addFeatureToUser(newUser.id, "read:activation_token");
   await mailer.sendVerificationEmail(newUser.email, token);
 
   return NextResponse.json(newUser, { status: 201 });

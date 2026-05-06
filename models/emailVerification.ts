@@ -3,6 +3,7 @@ import { verificationTokensSchema } from "@/infra/database/schema/verificationTo
 import { usersSchema } from "@/infra/database/schema/users";
 import { ValidationError } from "@/infra/errors";
 import { eq } from "drizzle-orm";
+import users from "@/models/users";
 
 async function createVerificationToken(email: string): Promise<string> {
   const token = crypto.randomUUID();
@@ -31,9 +32,15 @@ async function verifyEmailToken(token: string) {
     });
   }
 
-  await db.update(usersSchema).set({ emailVerified: new Date() }).where(eq(usersSchema.email, record.identifier));
+  const [updatedUser] = await db
+    .update(usersSchema)
+    .set({ emailVerified: new Date() })
+    .where(eq(usersSchema.email, record.identifier))
+    .returning({ id: usersSchema.id });
 
   await db.delete(verificationTokensSchema).where(eq(verificationTokensSchema.token, token));
+
+  await users.removeFeatureFromUser(updatedUser.id, "read:activation_token");
 }
 
 const emailVerification = { createVerificationToken, verifyEmailToken };
