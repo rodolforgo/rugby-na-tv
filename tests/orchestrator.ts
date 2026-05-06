@@ -25,6 +25,40 @@ export async function runMigrations() {
   await migrator.runMigrations();
 }
 
+export async function clearMailcatcher() {
+  await fetch("http://localhost:1080/messages", { method: "DELETE" });
+}
+
+export async function getLastVerificationToken(recipientEmail: string): Promise<string> {
+  const response = await fetch("http://localhost:1080/messages");
+  const messages = await response.json();
+
+  const message = [...messages].reverse().find((m: { recipients: string[] }) => m.recipients.some((r) => r.includes(recipientEmail)));
+
+  if (!message) throw new Error(`Nenhum email encontrado para ${recipientEmail}`);
+
+  const bodyResponse = await fetch(`http://localhost:1080/messages/${message.id}.html`);
+  const body = await bodyResponse.text();
+
+  const match = body.match(/token=([a-f0-9-]+)/);
+  if (!match) throw new Error("Token não encontrado no email");
+
+  return match[1];
+}
+
+export async function createTestUserViaApi(options?: { email?: string; password?: string }) {
+  const email = options?.email || `user_${crypto.randomUUID()}@email.com`;
+  const password = options?.password || "Password123!";
+
+  await fetch("http://localhost:3000/api/v1/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  return { email, rawPassword: password };
+}
+
 export async function createTestUser(options?: { email?: string; password?: string }) {
   const email = options?.email || `user_${crypto.randomUUID()}@email.com`;
   const password = options?.password || "Password123!";
