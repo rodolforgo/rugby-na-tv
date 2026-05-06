@@ -1,6 +1,7 @@
 import { db } from "@/infra/database";
 import { verificationTokensSchema } from "@/infra/database/schema/verificationTokens";
 import { eq } from "drizzle-orm";
+import users from "@/models/users";
 import { cleanDb, clearMailcatcher, getLastVerificationToken, runMigrations, waitWebServer } from "@/tests/orchestrator";
 
 beforeAll(async () => {
@@ -63,6 +64,23 @@ describe("POST /api/v1/users", () => {
 
     const emailToken = await getLastVerificationToken(email);
     expect(emailToken).toBe(tokenRecord?.token);
+  });
+});
+
+describe("POST /api/v1/users", () => {
+  test("Adiciona feature read:activation_token ao usuário após cadastro", async () => {
+    const email = `feature_${crypto.randomUUID()}@gmail.com`;
+
+    const response = await fetch("http://localhost:3000/api/v1/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: "NovoUsuario!" }),
+    });
+
+    const responseBody = await response.json();
+    expect(response.status).toBe(201);
+
+    expect(await users.hasFeature(responseBody.id, "read:activation_token")).toBe(true);
   });
 });
 

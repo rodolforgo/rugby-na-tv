@@ -1,5 +1,6 @@
 import { runQueryClient } from "@/infra/database/client";
 import migrator from "@/models/migrator";
+import seed from "@/infra/database/seed";
 import users from "@/models/users";
 
 export async function waitWebServer() {
@@ -23,6 +24,7 @@ export async function cleanDb() {
 
 export async function runMigrations() {
   await migrator.runMigrations();
+  await seed.seedFeatures();
 }
 
 export async function clearMailcatcher() {
