@@ -1,4 +1,7 @@
-import { cleanDb, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { db } from "@/infra/database";
+import { verificationTokensSchema } from "@/infra/database/schema/verificationTokens";
+import { eq } from "drizzle-orm";
+import { cleanDb, clearMailcatcher, getLastVerificationToken, runMigrations, waitWebServer } from "@/tests/orchestrator";
 
 beforeAll(async () => {
   await waitWebServer();
@@ -33,6 +36,33 @@ describe("POST /api/v1/users", () => {
     });
 
     expect(responseBody.password).not.toBe("NovoUsuario!");
+  });
+});
+
+describe("POST /api/v1/users", () => {
+  test("cria token de verificação no banco e envia email ao cadastrar usuário", async () => {
+    const email = `verify_${crypto.randomUUID()}@gmail.com`;
+
+    await clearMailcatcher();
+
+    const response = await fetch("http://localhost:3000/api/v1/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: "NovoUsuario!" }),
+    });
+
+    expect(response.status).toBe(201);
+
+    const tokenRecord = await db.query.verificationTokensSchema.findFirst({
+      where: eq(verificationTokensSchema.identifier, email),
+    });
+
+    expect(tokenRecord).not.toBeNull();
+    expect(tokenRecord?.identifier).toBe(email);
+    expect(tokenRecord?.expires.getTime()).toBeGreaterThan(Date.now());
+
+    const emailToken = await getLastVerificationToken(email);
+    expect(emailToken).toBe(tokenRecord?.token);
   });
 });
 

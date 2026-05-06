@@ -4,6 +4,8 @@ import controller from "@/infra/controller";
 import validator from "@/models/validator";
 import { createUserSchema } from "@/domain/users/users.schema";
 import users from "@/models/users";
+import emailVerification from "@/models/emailVerification";
+import mailer from "@/infra/mailer";
 
 export const GET = controller.errorHandler(async () => {
   const allUsers = await users.getAllUsers();
@@ -17,6 +19,9 @@ export const POST = controller.errorHandler(async (req) => {
   validator.validateBody(createUserSchema, body);
 
   const newUser = await users.createNewUser(body);
+
+  const token = await emailVerification.createVerificationToken(newUser.email);
+  await mailer.sendVerificationEmail(newUser.email, token);
 
   return NextResponse.json(newUser, { status: 201 });
 });
