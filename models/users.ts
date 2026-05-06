@@ -12,7 +12,7 @@ async function validateUniqueEmail(email: string) {
 
   if (existingUser) {
     throw new ValidationError("Não foi possível concluir o cadastro.", {
-      action: "Verifique os dados informados e tente novamente."
+      action: "Verifique os dados informados e tente novamente.",
     });
   }
 }
