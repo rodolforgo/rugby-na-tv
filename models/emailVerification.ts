@@ -5,9 +5,11 @@ import { ValidationError } from "@/infra/errors";
 import { eq } from "drizzle-orm";
 import users from "@/models/users";
 
+const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000;
+
 async function createVerificationToken(email: string): Promise<string> {
   const token = crypto.randomUUID();
-  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const expires = new Date(Date.now() + TOKEN_EXPIRATION_MS);
 
   await db.insert(verificationTokensSchema).values({ identifier: email, token, expires });
 
