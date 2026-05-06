@@ -2,6 +2,7 @@ import { db } from "@/infra/database";
 import { verificationTokensSchema } from "@/infra/database/schema/verificationTokens";
 import { usersSchema } from "@/infra/database/schema/users";
 import { eq } from "drizzle-orm";
+import users from "@/models/users";
 import {
   cleanDb,
   clearMailcatcher,
@@ -100,5 +101,25 @@ describe("GET /api/v1/users/verify-email", () => {
 
     expect(response.status).toBe(400);
     expect(responseBody.name).toBe("ValidationError");
+  });
+
+  test("Com token válido remove feature read:activation_token após verificação do email", async () => {
+    const user = await createTestUser();
+    await users.addFeatureToUser(user.id, "read:activation_token");
+
+    const token = crypto.randomUUID();
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await db.insert(verificationTokensSchema).values({
+      identifier: user.email,
+      token,
+      expires,
+    });
+
+    expect(await users.hasFeature(user.id, "read:activation_token")).toBe(true);
+
+    await fetch(`http://localhost:3000/api/v1/users/verify-email?token=${token}`);
+
+    expect(await users.hasFeature(user.id, "read:activation_token")).toBe(false);
   });
 });
