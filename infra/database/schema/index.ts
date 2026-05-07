@@ -3,6 +3,7 @@ import { usersSchema } from "./users";
 import { verificationTokensSchema } from "./verificationTokens";
 import { featuresSchema } from "./features";
 import { userFeaturesSchema } from "./userFeatures";
+import { gamesSchema } from "./games";
 
 export const schema = {
   usersSchema,
@@ -10,4 +11,5 @@ export const schema = {
   verificationTokensSchema,
   featuresSchema,
   userFeaturesSchema,
+  gamesSchema,
 };
