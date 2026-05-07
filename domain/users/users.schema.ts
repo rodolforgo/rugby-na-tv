@@ -12,3 +12,9 @@ export const createUserSchema = z.object({
 });
 
 export type CreateUserSchema = z.infer<typeof createUserSchema>;
+
+export const resendEmailSchema = z.object({
+  email: z.email({ message: "Email inválido." }),
+});
+
+export type ResendEmailSchema = z.infer<typeof resendEmailSchema>;

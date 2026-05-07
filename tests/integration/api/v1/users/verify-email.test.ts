@@ -6,6 +6,7 @@ import users from "@/models/users";
 import {
   cleanDb,
   clearMailcatcher,
+  createTestToken,
   createTestUser,
   createTestUserViaApi,
   getLastVerificationToken,
@@ -41,14 +42,7 @@ describe("GET /api/v1/users/verify-email", () => {
 
   test("Com token válido verifica o email do usuário", async () => {
     const user = await createTestUser();
-    const token = crypto.randomUUID();
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-    await db.insert(verificationTokensSchema).values({
-      identifier: user.email,
-      token,
-      expires,
-    });
+    const token = await createTestToken(user.email);
 
     const response = await fetch(`http://localhost:3000/api/v1/users/verify-email?token=${token}`);
     const responseBody = await response.json();
@@ -73,14 +67,7 @@ describe("GET /api/v1/users/verify-email", () => {
 
   test("Com token expirado retorna 400 e remove o token do banco", async () => {
     const user = await createTestUser();
-    const token = crypto.randomUUID();
-    const expires = new Date(Date.now() - 1000);
-
-    await db.insert(verificationTokensSchema).values({
-      identifier: user.email,
-      token,
-      expires,
-    });
+    const token = await createTestToken(user.email, { expiresAt: new Date(Date.now() - 1000) });
 
     const response = await fetch(`http://localhost:3000/api/v1/users/verify-email?token=${token}`);
     const responseBody = await response.json();
@@ -107,14 +94,7 @@ describe("GET /api/v1/users/verify-email", () => {
     const user = await createTestUser();
     await users.addFeatureToUser(user.id, "read:activation_token");
 
-    const token = crypto.randomUUID();
-    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-    await db.insert(verificationTokensSchema).values({
-      identifier: user.email,
-      token,
-      expires,
-    });
+    const token = await createTestToken(user.email);
 
     expect(await users.hasFeature(user.id, "read:activation_token")).toBe(true);
 
