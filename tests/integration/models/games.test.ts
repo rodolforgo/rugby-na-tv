@@ -1,35 +1,42 @@
-// import games from "@/models/games";
-
-// describe("games.fetchByDate()", () => {
-//   test("Retorna jogos da API no formato Game", async () => {
-//     const today = new Date().toISOString().split("T")[0];
-//     const result = await games.fetchByDate(today);
-
-//     expect(Array.isArray(result)).toBe(true);
-
-//     if (result.length === 0) return;
-
-//     expect(result[0]).toMatchObject({
-//       id: expect.any(Number),
-//       date: expect.any(String),
-//       timestamp: expect.any(Number),
-//       country: { name: expect.any(String), flag: expect.any(String) },
-//       league: { name: expect.any(String), logo: expect.any(String) },
-//       teams: {
-//         home: { name: expect.any(String), logo: expect.any(String) },
-//         away: { name: expect.any(String), logo: expect.any(String) },
-//       },
-//       scores: {
-//         home: expect.anything(),
-//         away: expect.anything(),
-//       },
-//     });
-//   });
-// });
-
 import games from "@/models/games";
 import { cleanDb, runMigrations } from "@/tests/orchestrator";
 import { mockGame } from "@/tests/fixtures/games";
+import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
+
+describe("games.fetchByDate()", () => {
+  beforeEach(() => {
+    jest.spyOn(global, "fetch").mockResolvedValue({
+      json: async () => gamesByDateFixture,
+    } as Response);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test("Retorna jogos da API no formato Game", async () => {
+    const result = await games.fetchByDate("2026-05-07");
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+
+    expect(result[0]).toMatchObject({
+      id: expect.any(Number),
+      date: expect.any(String),
+      timestamp: expect.any(Number),
+      country: { name: expect.any(String), flag: expect.any(String) },
+      league: { name: expect.any(String), logo: expect.any(String) },
+      teams: {
+        home: { name: expect.any(String), logo: expect.any(String) },
+        away: { name: expect.any(String), logo: expect.any(String) },
+      },
+      scores: {
+        home: expect.anything(),
+        away: expect.anything(),
+      },
+    });
+  });
+});
 
 describe("games.saveGames()", () => {
   beforeEach(async () => {
