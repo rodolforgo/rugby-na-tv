@@ -15,6 +15,27 @@
       "when": 1778098949569,
       "tag": "0001_slippery_ogun",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778188894852,
+      "tag": "0002_lethal_mongu",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778189121058,
+      "tag": "0003_careless_enchantress",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778189422589,
+      "tag": "0004_familiar_slyde",
+      "breakpoints": true
     }
   ]
 }
