@@ -26,3 +26,47 @@
 //     });
 //   });
 // });
+
+import games from "@/models/games";
+import { cleanDb, runMigrations } from "@/tests/orchestrator";
+import { mockGame } from "@/tests/fixtures/games";
+
+describe("games.saveGames()", () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await runMigrations();
+  });
+
+  test("Insere novos jogos no banco", async () => {
+    await games.saveGames([mockGame]);
+
+    const saved = await games.findById(mockGame.id);
+
+    expect(saved).toBeDefined();
+    expect(saved?.homeTeamName).toBe("Bordeaux Begles");
+    expect(saved?.awayTeamName).toBe("Clermont");
+    expect(saved?.scoresHome).toBe(23);
+    expect(saved?.scoresAway).toBe(19);
+  });
+
+  test("Atualiza apenas os scores quando o jogo já existe", async () => {
+    await games.saveGames([mockGame]);
+
+    const updatedGame = {
+      ...mockGame,
+      scores: { home: 30, away: 25 },
+      teams: {
+        ...mockGame.teams,
+        home: { ...mockGame.teams.home, name: "Nome Diferente" },
+      },
+    };
+
+    await games.saveGames([updatedGame]);
+
+    const saved = await games.findById(mockGame.id);
+
+    expect(saved?.scoresHome).toBe(30);
+    expect(saved?.scoresAway).toBe(25);
+    expect(saved?.homeTeamName).toBe("Bordeaux Begles");
+  });
+});
