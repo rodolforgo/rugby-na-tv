@@ -1,0 +1,69 @@
+{
+  "get": "games",
+  "parameters": {
+    "date": "2026-05-07"
+  },
+  "errors": [],
+  "results": 1,
+  "response": [
+    {
+      "id": 50405,
+      "date": "2026-05-07T19:00:00+00:00",
+      "time": "19:00",
+      "timestamp": 1778180400,
+      "timezone": "UTC",
+      "week": "29",
+      "status": {
+        "long": "Finished",
+        "short": "FT"
+      },
+      "country": {
+        "id": 7,
+        "name": "France",
+        "code": "FR",
+        "flag": "https://media.api-sports.io/flags/fr.svg"
+      },
+      "league": {
+        "id": 17,
+        "name": "Pro D2",
+        "type": "League",
+        "logo": "https://media.api-sports.io/rugby/leagues/17.png",
+        "season": 2025
+      },
+      "teams": {
+        "home": {
+          "id": 118,
+          "name": "Provence Rugby",
+          "logo": "https://media.api-sports.io/rugby/teams/118.png"
+        },
+        "away": {
+          "id": 123,
+          "name": "Vannes",
+          "logo": "https://media.api-sports.io/rugby/teams/123.png"
+        }
+      },
+      "scores": {
+        "home": 34,
+        "away": 31
+      },
+      "periods": {
+        "first": {
+          "home": null,
+          "away": null
+        },
+        "second": {
+          "home": null,
+          "away": null
+        },
+        "overtime": {
+          "home": null,
+          "away": null
+        },
+        "second_overtime": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}
