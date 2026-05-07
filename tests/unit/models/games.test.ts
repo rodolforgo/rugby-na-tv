@@ -53,7 +53,7 @@ describe("games.fetchByDate()", () => {
         league: { name: expect.any(String), logo: expect.any(String) },
         teams: {
           home: { name: expect.any(String), logo: expect.any(String) },
-          away: { logo: expect.any(String) },
+          away: { name: expect.any(String), logo: expect.any(String) },
         },
       });
     }

@@ -19,7 +19,7 @@ export type Game = {
   league: { name: string; logo: string };
   teams: {
     home: { name: string; logo: string };
-    away: { logo: string };
+    away: { name: string; logo: string };
   };
   scores: { home: number | null; away: number | null };
 };

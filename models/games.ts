@@ -29,6 +29,7 @@ async function fetchByDate(date: string): Promise<Game[]> {
         logo: game.teams.home.logo,
       },
       away: {
+        name: game.teams.away.name,
         logo: game.teams.away.logo,
       },
     },
