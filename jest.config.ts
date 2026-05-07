@@ -5,6 +5,7 @@ import dotenvExpand from "dotenv-expand";
 
 const env = dotenv.config({ path: `.env.development` });
 dotenvExpand.expand(env);
+dotenv.config({ path: `.env.development.local`, override: true });
 
 const createJestConfig = nextJest({
   dir: "./",
