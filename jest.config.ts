@@ -14,6 +14,7 @@ const config: Config = {
   coverageProvider: "v8",
   moduleDirectories: ["node_modules", "<rootDir>/"],
   testTimeout: 60000,
+  forceExit: true,
 };
 
 export default createJestConfig(config);
