@@ -4,6 +4,7 @@ import { verificationTokensSchema } from "./verificationTokens";
 import { featuresSchema } from "./features";
 import { userFeaturesSchema } from "./userFeatures";
 import { gamesSchema } from "./games";
+import { channelsSchema } from "./channels";
 
 export const schema = {
   usersSchema,
@@ -12,4 +13,5 @@ export const schema = {
   featuresSchema,
   userFeaturesSchema,
   gamesSchema,
+  channelsSchema,
 };

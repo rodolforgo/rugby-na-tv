@@ -22,6 +22,13 @@
       "when": 1778188894852,
       "tag": "0002_lethal_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778189121058,
+      "tag": "0003_careless_enchantress",
+      "breakpoints": true
     }
   ]
 }
