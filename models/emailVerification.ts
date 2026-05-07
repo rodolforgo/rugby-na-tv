@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import users from "@/models/users";
 
 const TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000;
+const RESEND_COOLDOWN_MS = 60 * 1000;
 
 async function createVerificationToken(email: string): Promise<string> {
   const token = crypto.randomUUID();
@@ -45,6 +46,47 @@ async function verifyEmailToken(token: string) {
   await users.removeFeatureFromUser(updatedUser.id, "read:activation_token");
 }
 
-const emailVerification = { createVerificationToken, verifyEmailToken };
+async function resendVerificationToken(email: string): Promise<string> {
+  const user = await db.query.usersSchema.findFirst({
+    where: eq(usersSchema.email, email),
+  });
+
+  if (!user) {
+    throw new ValidationError("Não foi possível processar a solicitação.", {
+      action: "Verifique o email informado e tente novamente.",
+    });
+  }
+
+  if (user.emailVerified) {
+    throw new ValidationError("Email já verificado.", {
+      action: "Faça login para acessar sua conta.",
+    });
+  }
+
+  const existingToken = await db.query.verificationTokensSchema.findFirst({
+    where: eq(verificationTokensSchema.identifier, email),
+  });
+
+  if (existingToken) {
+    const tokenCreatedAt = existingToken.expires.getTime() - TOKEN_EXPIRATION_MS;
+    const cooldownEnd = tokenCreatedAt + RESEND_COOLDOWN_MS;
+
+    if (Date.now() < cooldownEnd) {
+      throw new ValidationError("Aguarde antes de solicitar um novo link de verificação.", {
+        action: "Verifique sua caixa de entrada ou tente novamente em instantes.",
+      });
+    }
+
+    await db.delete(verificationTokensSchema).where(eq(verificationTokensSchema.identifier, email));
+  }
+
+  const token = await createVerificationToken(email);
+
+  await users.addFeatureToUser(user.id, "read:activation_token");
+
+  return token;
+}
+
+const emailVerification = { createVerificationToken, verifyEmailToken, resendVerificationToken };
 
 export default emailVerification;
