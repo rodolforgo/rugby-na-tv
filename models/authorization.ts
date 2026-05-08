@@ -4,10 +4,10 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { UnauthorizedError } from "@/infra/errors";
-import NextAuth from "next-auth";
+import type { AuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
-const { handlers, auth, signIn, signOut } = NextAuth({
+const authOptions: AuthOptions = {
   adapter: DrizzleAdapter(db),
   session: {
     strategy: "database",
@@ -47,7 +47,7 @@ const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
   },
-});
+};
 
 async function verifyPassword(plain: string, hashed: string) {
   const passwordMatch = await bcrypt.compare(plain, hashed);
@@ -57,6 +57,6 @@ async function verifyPassword(plain: string, hashed: string) {
   }
 }
 
-const authorization = { handlers, auth, signIn, signOut, verifyPassword };
+const authorization = { authOptions, verifyPassword };
 
 export default authorization;

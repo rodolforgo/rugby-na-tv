@@ -1,3 +1,6 @@
+import NextAuth from "next-auth";
 import authorization from "@/models/authorization";
 
-export const { GET, POST } = authorization.handlers;
+const handler = NextAuth(authorization.authOptions);
+
+export { handler as GET, handler as POST };
