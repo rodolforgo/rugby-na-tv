@@ -99,6 +99,14 @@ describe("games.createGame()", () => {
 
     expect(first.id).not.toBe(second.id);
   });
+
+  test("Insere um jogo com apiId e retorna o jogo criado", async () => {
+    const created = await games.createGame(mockGameData);
+
+    expect(created.id).toBeDefined();
+    expect(created.apiId).toBe(mockGameData.apiId);
+    expect(created.homeTeamName).toBe("Bordeaux Begles");
+  });
 });
 
 describe("games.findById()", () => {
