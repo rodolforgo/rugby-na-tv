@@ -1,10 +1,10 @@
-import type { ApiGame, Game } from "@/domain/games/games.types";
+import type { ApiGame, GameData } from "@/domain/games/games.types";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
 
 const RUGBY_API_BASE_URL = "https://v1.rugby.api-sports.io";
 
-async function fetchByDate(date: string): Promise<Game[]> {
+async function fetchByDate(date: string): Promise<GameData[]> {
   const response = await fetch(`${RUGBY_API_BASE_URL}/games?date=${date}`, {
     headers: {
       "x-apisports-key": process.env.RUGBY_API_KEY as string,
@@ -14,7 +14,7 @@ async function fetchByDate(date: string): Promise<Game[]> {
   const data: { response: ApiGame[] } = await response.json();
 
   return data.response.map((game) => ({
-    id: game.id,
+    apiId: game.id,
     date: game.date,
     timestamp: game.timestamp,
     country: {
@@ -42,50 +42,60 @@ async function fetchByDate(date: string): Promise<Game[]> {
   }));
 }
 
-async function upsertGame(game: Game): Promise<void> {
-  await db
+async function createGame(data: GameData) {
+  const [created] = await db
     .insert(gamesSchema)
     .values({
-      id: game.id,
-      date: new Date(game.date),
-      timestamp: game.timestamp,
-      countryName: game.country.name,
-      countryFlag: game.country.flag,
-      leagueName: game.league.name,
-      leagueLogo: game.league.logo,
-      homeTeamName: game.teams.home.name,
-      homeTeamLogo: game.teams.home.logo,
-      awayTeamName: game.teams.away.name,
-      awayTeamLogo: game.teams.away.logo,
-      scoresHome: game.scores.home,
-      scoresAway: game.scores.away,
+      apiId: data.apiId,
+      date: new Date(data.date),
+      timestamp: data.timestamp,
+      countryName: data.country.name,
+      countryFlag: data.country.flag,
+      leagueName: data.league.name,
+      leagueLogo: data.league.logo,
+      homeTeamName: data.teams.home.name,
+      homeTeamLogo: data.teams.home.logo,
+      awayTeamName: data.teams.away.name,
+      awayTeamLogo: data.teams.away.logo,
+      scoresHome: data.scores.home,
+      scoresAway: data.scores.away,
     })
     .onConflictDoUpdate({
-      target: gamesSchema.id,
+      target: gamesSchema.apiId,
       set: {
-        scoresHome: game.scores.home,
-        scoresAway: game.scores.away,
+        scoresHome: data.scores.home,
+        scoresAway: data.scores.away,
         updated_at: new Date(),
       },
-    });
+    })
+    .returning();
+  return created;
 }
 
-async function saveGames(gamesList: Game[]): Promise<void> {
+async function saveGames(gamesList: GameData[]): Promise<void> {
   for (const game of gamesList) {
-    await upsertGame(game);
+    await createGame(game);
   }
 }
 
-async function findById(id: number) {
+async function findById(id: string) {
   return await db.query.gamesSchema.findFirst({
     where: (games, { eq }) => eq(games.id, id),
+  });
+}
+
+async function findByApiId(apiId: number) {
+  return await db.query.gamesSchema.findFirst({
+    where: (games, { eq }) => eq(games.apiId, apiId),
   });
 }
 
 const games = {
   fetchByDate,
   saveGames,
+  createGame,
   findById,
+  findByApiId,
 };
 
 export default games;
