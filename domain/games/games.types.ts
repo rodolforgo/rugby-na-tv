@@ -11,8 +11,8 @@ export type ApiGame = {
   scores: { home: number | null; away: number | null };
 };
 
-export type Game = {
-  id: number;
+export type GameData = {
+  apiId: number | null;
   date: string;
   timestamp: number;
   country: { name: string; flag: string };
@@ -23,3 +23,5 @@ export type Game = {
   };
   scores: { home: number | null; away: number | null };
 };
+
+export type Game = GameData & { id: string };
