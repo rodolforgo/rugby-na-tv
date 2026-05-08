@@ -4,7 +4,7 @@ import controller from "@/infra/controller";
 import emailVerification from "@/models/emailVerification";
 
 export const GET = controller.errorHandler(async (req) => {
-  const token = req.nextUrl.searchParams.get("token");
+  const token = new URL(req.url).searchParams.get("token");
 
   if (!token) {
     throw new ValidationError("O campo token está inválido.", {
