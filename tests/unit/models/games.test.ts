@@ -19,7 +19,7 @@ describe("games.fetchByDate()", () => {
 
     if (result.length > 0) {
       expect(result[0]).toMatchObject({
-        id: expect.any(Number),
+        apiId: expect.any(Number),
         date: expect.any(String),
         timestamp: expect.any(Number),
         country: { name: expect.any(String), flag: expect.any(String) },
