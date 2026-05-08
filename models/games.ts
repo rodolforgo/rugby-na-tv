@@ -42,40 +42,6 @@ async function fetchByDate(date: string): Promise<GameData[]> {
   }));
 }
 
-async function upsertGame(game: GameData): Promise<void> {
-  await db
-    .insert(gamesSchema)
-    .values({
-      apiId: game.apiId,
-      date: new Date(game.date),
-      timestamp: game.timestamp,
-      countryName: game.country.name,
-      countryFlag: game.country.flag,
-      leagueName: game.league.name,
-      leagueLogo: game.league.logo,
-      homeTeamName: game.teams.home.name,
-      homeTeamLogo: game.teams.home.logo,
-      awayTeamName: game.teams.away.name,
-      awayTeamLogo: game.teams.away.logo,
-      scoresHome: game.scores.home,
-      scoresAway: game.scores.away,
-    })
-    .onConflictDoUpdate({
-      target: gamesSchema.apiId,
-      set: {
-        scoresHome: game.scores.home,
-        scoresAway: game.scores.away,
-        updated_at: new Date(),
-      },
-    });
-}
-
-async function saveGames(gamesList: GameData[]): Promise<void> {
-  for (const game of gamesList) {
-    await upsertGame(game);
-  }
-}
-
 async function createGame(data: GameData) {
   const [created] = await db
     .insert(gamesSchema)
@@ -94,8 +60,22 @@ async function createGame(data: GameData) {
       scoresHome: data.scores.home,
       scoresAway: data.scores.away,
     })
+    .onConflictDoUpdate({
+      target: gamesSchema.apiId,
+      set: {
+        scoresHome: data.scores.home,
+        scoresAway: data.scores.away,
+        updated_at: new Date(),
+      },
+    })
     .returning();
   return created;
+}
+
+async function saveGames(gamesList: GameData[]): Promise<void> {
+  for (const game of gamesList) {
+    await createGame(game);
+  }
 }
 
 async function findById(id: string) {
