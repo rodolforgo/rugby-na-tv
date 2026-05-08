@@ -1,7 +1,8 @@
-import { pgTable, integer, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, integer, varchar, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const gamesSchema = pgTable("games", {
-  id: integer().primaryKey(),
+  id: uuid().defaultRandom().primaryKey(),
+  apiId: integer().unique(),
   date: timestamp({ withTimezone: true }).notNull(),
   timestamp: integer().notNull(),
   countryName: varchar({ length: 255 }).notNull(),

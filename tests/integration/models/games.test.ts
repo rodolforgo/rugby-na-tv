@@ -1,6 +1,6 @@
 import games from "@/models/games";
 import { cleanDb, runMigrations } from "@/tests/orchestrator";
-import { mockGame } from "@/tests/fixtures/games";
+import { mockGameData } from "@/tests/fixtures/games";
 import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
 
 describe("games.fetchByDate()", () => {
@@ -14,14 +14,14 @@ describe("games.fetchByDate()", () => {
     jest.restoreAllMocks();
   });
 
-  test("Retorna jogos da API no formato Game", async () => {
+  test("Retorna jogos da API no formato GameData", async () => {
     const result = await games.fetchByDate("2026-05-07");
 
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBeGreaterThan(0);
 
     expect(result[0]).toMatchObject({
-      id: expect.any(Number),
+      apiId: expect.any(Number),
       date: expect.any(String),
       timestamp: expect.any(Number),
       country: { name: expect.any(String), flag: expect.any(String) },
@@ -45,9 +45,9 @@ describe("games.saveGames()", () => {
   });
 
   test("Insere novos jogos no banco", async () => {
-    await games.saveGames([mockGame]);
+    await games.saveGames([mockGameData]);
 
-    const saved = await games.findById(mockGame.id);
+    const saved = await games.findByApiId(mockGameData.apiId as number);
 
     expect(saved).toBeDefined();
     expect(saved?.homeTeamName).toBe("Bordeaux Begles");
@@ -57,23 +57,61 @@ describe("games.saveGames()", () => {
   });
 
   test("Atualiza apenas os scores quando o jogo já existe", async () => {
-    await games.saveGames([mockGame]);
+    await games.saveGames([mockGameData]);
 
     const updatedGame = {
-      ...mockGame,
+      ...mockGameData,
       scores: { home: 30, away: 25 },
       teams: {
-        ...mockGame.teams,
-        home: { ...mockGame.teams.home, name: "Nome Diferente" },
+        ...mockGameData.teams,
+        home: { ...mockGameData.teams.home, name: "Nome Diferente" },
       },
     };
 
     await games.saveGames([updatedGame]);
 
-    const saved = await games.findById(mockGame.id);
+    const saved = await games.findByApiId(mockGameData.apiId as number);
 
     expect(saved?.scoresHome).toBe(30);
     expect(saved?.scoresAway).toBe(25);
     expect(saved?.homeTeamName).toBe("Bordeaux Begles");
+  });
+});
+
+describe("games.createGame()", () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await runMigrations();
+  });
+
+  test("Insere um jogo sem id da API e retorna o jogo criado", async () => {
+    const created = await games.createGame({ ...mockGameData, apiId: null });
+
+    expect(created.id).toBeDefined();
+    expect(created.apiId).toBeNull();
+    expect(created.homeTeamName).toBe("Bordeaux Begles");
+    expect(created.scoresHome).toBe(23);
+  });
+
+  test("Permite inserir múltiplos jogos sem id da API sem conflito", async () => {
+    const first = await games.createGame({ ...mockGameData, apiId: null });
+    const second = await games.createGame({ ...mockGameData, apiId: null });
+
+    expect(first.id).not.toBe(second.id);
+  });
+});
+
+describe("games.findById()", () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await runMigrations();
+  });
+
+  test("Retorna o jogo pelo id interno", async () => {
+    const created = await games.createGame({ ...mockGameData, apiId: null });
+    const found = await games.findById(created.id);
+
+    expect(found).toBeDefined();
+    expect(found?.homeTeamName).toBe("Bordeaux Begles");
   });
 });
