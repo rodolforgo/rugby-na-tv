@@ -1,7 +1,7 @@
-import type { Game } from "@/domain/games/games.types";
+import type { GameData } from "@/domain/games/games.types";
 
-export const mockGame: Game = {
-  id: 8279,
+export const mockGameData: GameData = {
+  apiId: 8279,
   date: "2018-09-22T12:45:00+00:00",
   timestamp: 1537620300,
   country: { name: "France", flag: "https://media.api-sports.io/flags/fr.svg" },
