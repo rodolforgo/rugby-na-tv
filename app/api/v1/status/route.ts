@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { runQueryClient } from "@/infra/database/client";
 import { methodNotAllowedResponse } from "@/infra/errors";
 import controller from "@/infra/controller";
+import mailer from "@/infra/mailer";
 
 export const GET = controller.errorHandler(async () => {
   const updatedAt = new Date().toISOString();
@@ -19,6 +20,8 @@ export const GET = controller.errorHandler(async () => {
     return { version, maxConnections, openedConnections };
   });
 
+  const mailerStatus = await mailer.checkConnection();
+
   const res = {
     updated_at: updatedAt,
     database: {
@@ -26,6 +29,7 @@ export const GET = controller.errorHandler(async () => {
       maxConnections: dbResponse.maxConnections.rows[0]?.max_connections,
       openedConnections: dbResponse.openedConnections.rows[0]?.total,
     },
+    mailer: mailerStatus,
   };
 
   return NextResponse.json(res);

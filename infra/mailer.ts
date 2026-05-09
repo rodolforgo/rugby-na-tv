@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import type { MailerStatus } from "@/domain/mailer/mailer.types";
 
 const auth = process.env.SMTP_USER && process.env.SMTP_PASS ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } : undefined;
 
@@ -21,6 +22,17 @@ async function sendVerificationEmail(to: string, token: string) {
   });
 }
 
-const mailer = { sendVerificationEmail };
+async function checkConnection(): Promise<MailerStatus> {
+  if (!process.env.SMTP_HOST) return { status: "não configurado" };
+
+  try {
+    await transporter.verify();
+    return { status: "ok" };
+  } catch (error) {
+    return { status: "indisponível", erro: (error as Error).message };
+  }
+}
+
+const mailer = { sendVerificationEmail, checkConnection };
 
 export default mailer;
