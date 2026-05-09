@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npm run docker:up && next dev --turbopack",
     "build": "next build --turbopack",
+    "vercel-build": "npm run db:migrate && next build --turbopack",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
