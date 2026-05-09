@@ -22,7 +22,6 @@ export async function runQueryClient<T>(callback: (db: NodePgDatabase, client: C
 export async function getNewClient() {
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
-    ssl: false,
   });
 
   await client.connect();
