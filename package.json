@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npm run docker:up && next dev --turbopack",
     "build": "next build --turbopack",
-    "vercel-build": "npm run db:migrate && next build --turbopack",
+    "vercel-build": "npm run db:migrate && npm run db:seed && next build --turbopack",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
@@ -13,6 +13,7 @@
     "docker:down": "docker compose -f infra/compose.yml down",
     "test": "npm run docker:up && concurrently --names next,jest --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose\" && npm run docker:down",
     "test:watch": "jest --watchAll --runInBand",
+    "db:seed": "tsx infra/database/seed-runner.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
