@@ -22,7 +22,7 @@ export const GET = controller.errorHandler(async () => {
   });
 
   const mailerStatus = await mailer.checkConnection();
-  const lastSync = await games.getLastSync();
+  const lastSync = await games.getLastSync().catch(() => null);
 
   const res = {
     updated_at: updatedAt,
