@@ -1,6 +1,8 @@
 import type { ApiGame, GameData } from "@/domain/games/games.types";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
+import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
+import { desc } from "drizzle-orm";
 
 const RUGBY_API_BASE_URL = "https://v1.rugby.api-sports.io";
 
@@ -90,12 +92,29 @@ async function findByApiId(apiId: number) {
   });
 }
 
+async function syncByDate(date: string) {
+  const gamesList = await fetchByDate(date);
+  await saveGames(gamesList);
+
+  const [log] = await db.insert(syncLogsSchema).values({ syncedDate: date, gamesTotal: gamesList.length, status: "success" }).returning();
+
+  return { date, gamesTotal: gamesList.length, syncedAt: log.created_at };
+}
+
+async function getLastSync() {
+  return await db.query.syncLogsSchema.findFirst({
+    orderBy: [desc(syncLogsSchema.created_at)],
+  });
+}
+
 const games = {
   fetchByDate,
   saveGames,
   createGame,
   findById,
   findByApiId,
+  syncByDate,
+  getLastSync,
 };
 
 export default games;

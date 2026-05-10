@@ -6,6 +6,7 @@ import { userFeaturesSchema } from "./userFeatures";
 import { gamesSchema } from "./games";
 import { channelsSchema } from "./channels";
 import { gameChannelsSchema } from "./gameChannels";
+import { syncLogsSchema } from "./syncLogs";
 
 export const schema = {
   usersSchema,
@@ -16,4 +17,5 @@ export const schema = {
   gamesSchema,
   channelsSchema,
   gameChannelsSchema,
+  syncLogsSchema,
 };
