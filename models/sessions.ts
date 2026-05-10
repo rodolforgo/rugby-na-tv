@@ -3,11 +3,16 @@ import { sessionSchema } from "@/infra/database/schema/sessions";
 import type { CreateSessionSchema } from "@/domain/sessions/sessions.schema";
 import users from "@/models/users";
 import authorization from "@/models/authorization";
+import { UnauthorizedError } from "@/infra/errors";
 
 async function createSession(credentials: CreateSessionSchema) {
   const user = await users.getUserByEmail(credentials.email);
 
   await authorization.verifyPassword(credentials.password, user.password);
+
+  if (!user.emailVerified) {
+    throw new UnauthorizedError("E-mail não verificado. Verifique sua caixa de entrada.");
+  }
 
   const sessionToken = crypto.randomUUID();
 
