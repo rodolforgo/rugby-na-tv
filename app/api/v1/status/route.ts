@@ -4,6 +4,7 @@ import { runQueryClient } from "@/infra/database/client";
 import { methodNotAllowedResponse } from "@/infra/errors";
 import controller from "@/infra/controller";
 import mailer from "@/infra/mailer";
+import games from "@/models/games";
 
 export const GET = controller.errorHandler(async () => {
   const updatedAt = new Date().toISOString();
@@ -21,6 +22,7 @@ export const GET = controller.errorHandler(async () => {
   });
 
   const mailerStatus = await mailer.checkConnection();
+  const lastSync = await games.getLastSync();
 
   const res = {
     updated_at: updatedAt,
@@ -30,6 +32,7 @@ export const GET = controller.errorHandler(async () => {
       openedConnections: dbResponse.openedConnections.rows[0]?.total,
     },
     mailer: mailerStatus,
+    lastSync: lastSync ?? null,
   };
 
   return NextResponse.json(res);

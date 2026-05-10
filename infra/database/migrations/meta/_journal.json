@@ -43,6 +43,13 @@
       "when": 1778240419920,
       "tag": "0005_old_black_tom",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778455179477,
+      "tag": "0006_worthless_lila_cheney",
+      "breakpoints": true
     }
   ]
 }
