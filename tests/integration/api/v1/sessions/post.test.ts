@@ -1,4 +1,4 @@
-import { cleanDb, runMigrations, waitWebServer, createTestUser } from "@/tests/orchestrator";
+import { cleanDb, runMigrations, waitWebServer, createTestUser, verifyUserEmail } from "@/tests/orchestrator";
 
 beforeAll(async () => {
   await waitWebServer();
@@ -10,6 +10,7 @@ describe("POST /api/v1/sessions", () => {
   describe("Usuário anônimo", () => {
     test("Cria sessão com credenciais válidas e define cookie de 7 dias", async () => {
       const user = await createTestUser();
+      await verifyUserEmail(user.id);
 
       const response = await fetch("http://localhost:3000/api/v1/sessions", {
         method: "POST",
@@ -59,6 +60,18 @@ describe("POST /api/v1/sessions", () => {
       });
 
       expect(response.status).toBe(400);
+    });
+
+    test("Retorna 401 quando e-mail não foi verificado", async () => {
+      const user = await createTestUser();
+
+      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email, password: user.rawPassword }),
+      });
+
+      expect(response.status).toBe(401);
     });
 
     test("Retorna 401 com senha incorreta", async () => {
