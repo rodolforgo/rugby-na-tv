@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   auth,
 });
 
-const BASE_URL = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
+const BASE_URL = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
 async function sendVerificationEmail(to: string, token: string) {
   if (!process.env.SMTP_HOST) return;
