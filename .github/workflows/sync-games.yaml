@@ -1,0 +1,28 @@
+name: Sync de jogos
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sincronizar jogos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sincronizar jogos de hoje
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+          curl --fail -X POST ${{ vars.APP_URL }}/api/v1/games/sync \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}" \
+            -d "{\"date\": \"$TODAY\"}"
+
+      - name: Sincronizar jogos de amanhã
+        run: |
+          TOMORROW=$(date -u -d "+1 day" +%Y-%m-%d)
+          curl --fail -X POST ${{ vars.APP_URL }}/api/v1/games/sync \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}" \
+            -d "{\"date\": \"$TOMORROW\"}"
