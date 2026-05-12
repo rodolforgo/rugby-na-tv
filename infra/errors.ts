@@ -13,7 +13,6 @@ export class CustomError extends Error {
 
   constructor(message: string, options?: CustomErrorOptions) {
     super(message, { cause: options?.cause });
-    this.name = new.target.name;
     this.action = options?.action || "Tente novamente.";
     this.statusCode = options?.statusCode || 400;
     Object.setPrototypeOf(this, new.target.prototype);
@@ -30,6 +29,7 @@ export class CustomError extends Error {
 }
 
 export class InternalServerError extends CustomError {
+  override name = "InternalServerError";
   constructor({ cause }: CustomErrorOptions) {
     super("Aconteceu um erro interno no servidor.", {
       cause,
@@ -40,6 +40,7 @@ export class InternalServerError extends CustomError {
 }
 
 export class ValidationError extends CustomError {
+  override name = "ValidationError";
   constructor(message: string, options?: CustomErrorOptions) {
     super(message || "Erro de validação.", {
       action: options?.action || "Verifique os dados enviados e tente novamente.",
@@ -49,6 +50,7 @@ export class ValidationError extends CustomError {
 }
 
 export class UnauthorizedError extends CustomError {
+  override name = "UnauthorizedError";
   constructor(message?: string) {
     super(message || "Credenciais inválidas.", {
       action: "Verifique o e-mail e a senha informados.",
@@ -58,6 +60,7 @@ export class UnauthorizedError extends CustomError {
 }
 
 export class ServiceError extends CustomError {
+  override name = "ServiceError";
   constructor() {
     super("Serviço indisponível no momento.", {
       statusCode: 503,
@@ -66,6 +69,7 @@ export class ServiceError extends CustomError {
 }
 
 export class MethodNotAllowedError extends CustomError {
+  override name = "MethodNotAllowedError";
   constructor() {
     super("Método não permitido para este endpoint.", {
       statusCode: 405,
