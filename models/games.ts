@@ -1,4 +1,4 @@
-import type { ApiGame, GameData } from "@/domain/games/games.types";
+import type { ApiGame, Broadcast, GameData, RoninApiResponse } from "@/domain/games/games.types";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
 import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
@@ -107,6 +107,27 @@ async function getLastSync() {
   });
 }
 
+async function fetchBroadcastsByDate(date: string): Promise<Broadcast[]> {
+  const url = `https://api2.roninmedia.io/2/fixtures/grouped?token=${process.env.RONIN_API_TOKEN}&day=${date}&dayBreakHour=0&tz=America/Sao_Paulo&sportId=8`;
+  const response = await fetch(url);
+  const data: RoninApiResponse = await response.json();
+
+  return (data?.[0]?.sports?.[0] ?? []).flatMap((day) =>
+    day.sports.flatMap((sport) =>
+      sport.leagues.flatMap((league) =>
+        [...(league.oldFixtures ?? []), ...(league.fixtures ?? [])].map((f) => ({
+          id: f.fixture_id,
+          date: f.date,
+          homeTeam: f.home_team,
+          visitingTeam: f.visiting_team,
+          league: f.league,
+          channels: f.channels.map((c) => ({ name: c.name })),
+        })),
+      ),
+    ),
+  );
+}
+
 const games = {
   fetchByDate,
   saveGames,
@@ -115,6 +136,7 @@ const games = {
   findByApiId,
   syncByDate,
   getLastSync,
+  fetchBroadcastsByDate,
 };
 
 export default games;
