@@ -25,3 +25,34 @@ export type GameData = {
 };
 
 export type Game = GameData & { id: string };
+
+export type Broadcast = {
+  id: number;
+  date: string;
+  homeTeam: string;
+  visitingTeam: string;
+  league: string;
+  channels: { name: string }[];
+};
+
+type RoninFixture = {
+  fixture_id: number;
+  date: string;
+  home_team: string;
+  visiting_team: string;
+  league: string;
+  channels: { name: string }[];
+};
+
+export type RoninApiResponse = Array<{
+  sports: Array<
+    Array<{
+      sports: Array<{
+        leagues: Array<{
+          oldFixtures?: RoninFixture[];
+          fixtures?: RoninFixture[];
+        }>;
+      }>;
+    }>
+  >;
+}>;
