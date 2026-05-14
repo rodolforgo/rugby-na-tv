@@ -13,9 +13,9 @@ async function fetchByDate(date: string): Promise<GameData[]> {
     },
   });
 
-  const data: { response: ApiGame[] } = await response.json();
+  const data: { response: ApiGame[] | null } = await response.json();
 
-  return data.response.map((game) => ({
+  return (data.response ?? []).map((game) => ({
     apiId: game.id,
     date: game.date,
     timestamp: game.timestamp,
