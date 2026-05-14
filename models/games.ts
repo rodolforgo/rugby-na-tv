@@ -1,4 +1,4 @@
-import type { ApiGame, Broadcast, GameData, RoninApiResponse } from "@/domain/games/games.types";
+import type { ApiGame, Broadcast, BroadcastCompareResult, GameData, RoninApiResponse } from "@/domain/games/games.types";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
 import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
@@ -107,6 +107,39 @@ async function getLastSync() {
   });
 }
 
+async function findGamesByDate(date: string) {
+  const start = new Date(`${date}T00:00:00Z`);
+  const end = new Date(`${date}T00:00:00Z`);
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return await db.query.gamesSchema.findMany({
+    where: (g, { and, gte, lt }) => and(gte(g.date, start), lt(g.date, end)),
+  });
+}
+
+async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> {
+  const [broadcasts, dbGames] = await Promise.all([fetchBroadcastsByDate(date), findGamesByDate(date)]);
+
+  const normalize = (s: string) => s.toLowerCase().trim();
+  const unmatched: BroadcastCompareResult["unmatched"] = [];
+  let matched = 0;
+
+  for (const broadcast of broadcasts) {
+    const found = dbGames.some(
+      (game) =>
+        normalize(broadcast.homeTeam) === normalize(game.homeTeamName) &&
+        normalize(broadcast.visitingTeam) === normalize(game.awayTeamName),
+    );
+    if (found) {
+      matched++;
+    } else {
+      unmatched.push({ homeTeam: broadcast.homeTeam, visitingTeam: broadcast.visitingTeam, league: broadcast.league });
+    }
+  }
+
+  return { date, roninTotal: broadcasts.length, matched, unmatched };
+}
+
 async function fetchBroadcastsByDate(date: string): Promise<Broadcast[]> {
   const url = `https://api2.roninmedia.io/2/fixtures/grouped?token=${process.env.RONIN_API_TOKEN}&day=${date}&dayBreakHour=0&tz=America/Sao_Paulo&sportId=8`;
   const response = await fetch(url);
@@ -134,9 +167,11 @@ const games = {
   createGame,
   findById,
   findByApiId,
+  findGamesByDate,
   syncByDate,
   getLastSync,
   fetchBroadcastsByDate,
+  compareBroadcasts,
 };
 
 export default games;

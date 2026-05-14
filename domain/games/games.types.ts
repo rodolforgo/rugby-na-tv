@@ -26,6 +26,13 @@ export type GameData = {
 
 export type Game = GameData & { id: string };
 
+export type BroadcastCompareResult = {
+  date: string;
+  roninTotal: number;
+  matched: number;
+  unmatched: { homeTeam: string; visitingTeam: string; league: string }[];
+};
+
 export type Broadcast = {
   id: number;
   date: string;
