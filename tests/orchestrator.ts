@@ -2,6 +2,7 @@ import { runQueryClient } from "@/infra/database/client";
 import { db } from "@/infra/database";
 import { usersSchema } from "@/infra/database/schema/users";
 import { verificationTokensSchema } from "@/infra/database/schema/verificationTokens";
+import { gamesSchema } from "@/infra/database/schema/games";
 import migrator from "@/models/migrator";
 import seed from "@/infra/database/seed";
 import users from "@/models/users";
@@ -78,6 +79,23 @@ export async function createTestToken(email: string, options?: { expiresAt?: Dat
 
 export async function setTokenExpires(email: string, expires: Date) {
   await db.update(verificationTokensSchema).set({ expires }).where(eq(verificationTokensSchema.identifier, email));
+}
+
+export async function createTestGame(options: { homeTeamName: string; awayTeamName: string; date: Date }) {
+  const [game] = await db
+    .insert(gamesSchema)
+    .values({
+      date: options.date,
+      timestamp: Math.floor(options.date.getTime() / 1000),
+      countryName: "Test",
+      leagueName: "Test League",
+      homeTeamName: options.homeTeamName,
+      awayTeamName: options.awayTeamName,
+      scoresHome: null,
+      scoresAway: null,
+    })
+    .returning();
+  return game;
 }
 
 export async function createTestUser(options?: { email?: string; password?: string }) {

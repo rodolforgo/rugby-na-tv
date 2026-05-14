@@ -138,7 +138,7 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
     }
   }
 
-  return { date, roninTotal: broadcasts.length, matched, unmatched };
+  return { date, roninTotal: broadcasts.length, dbGamesTotal: dbGames.length, matched, unmatched };
 }
 
 async function fetchBroadcastsByDate(date: string): Promise<Broadcast[]> {
