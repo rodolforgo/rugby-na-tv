@@ -2,11 +2,11 @@ export type ApiGame = {
   id: number;
   date: string;
   timestamp: number;
-  country: { name: string; flag: string };
-  league: { name: string; logo: string };
+  country: { name: string; flag: string | null };
+  league: { name: string; logo: string | null };
   teams: {
-    home: { name: string; logo: string };
-    away: { name: string; logo: string };
+    home: { name: string; logo: string | null };
+    away: { name: string; logo: string | null };
   };
   scores: { home: number | null; away: number | null };
 };
@@ -15,11 +15,11 @@ export type GameData = {
   apiId: number | null;
   date: string;
   timestamp: number;
-  country: { name: string; flag: string };
-  league: { name: string; logo: string };
+  country: { name: string; flag: string | null };
+  league: { name: string; logo: string | null };
   teams: {
-    home: { name: string; logo: string };
-    away: { name: string; logo: string };
+    home: { name: string; logo: string | null };
+    away: { name: string; logo: string | null };
   };
   scores: { home: number | null; away: number | null };
 };
