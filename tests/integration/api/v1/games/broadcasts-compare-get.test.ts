@@ -1,4 +1,4 @@
-import { cleanDb, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/orchestrator";
 
 const COMPARE_URL = "http://localhost:3000/api/v1/games/broadcasts/compare";
 const VALID_TOKEN = process.env.SYNC_SECRET as string;
@@ -48,6 +48,7 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
       expect(response.status).toBe(200);
       expect(typeof body.date).toBe("string");
       expect(typeof body.roninTotal).toBe("number");
+      expect(typeof body.dbGamesTotal).toBe("number");
       expect(typeof body.matched).toBe("number");
       expect(Array.isArray(body.unmatched)).toBe(true);
     });
@@ -60,6 +61,7 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
       const body = await response.json();
 
       expect(response.status).toBe(200);
+      expect(body.dbGamesTotal).toBe(0);
       expect(body.matched).toBe(0);
       expect(body.unmatched).toHaveLength(body.roninTotal);
     });
@@ -78,6 +80,28 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
         expect(typeof item.homeTeam).toBe("string");
         expect(typeof item.visitingTeam).toBe("string");
         expect(typeof item.league).toBe("string");
+      }
+    });
+
+    test("Jogo inserido no banco com mesmo nome é encontrado como correspondência", async () => {
+      await createTestGame({
+        homeTeamName: "Northampton Saints",
+        awayTeamName: "Bristol",
+        date: new Date("2026-05-15T18:45:00Z"),
+      });
+
+      const response = await fetch(`${COMPARE_URL}?date=2026-05-15`, {
+        headers: AUTH_HEADER,
+      });
+
+      const body = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(body.dbGamesTotal).toBe(1);
+
+      if (body.roninTotal > 0) {
+        const hasNorthampton = body.matched > 0 || body.unmatched.some((u: { homeTeam: string }) => u.homeTeam === "Northampton Saints");
+        expect(hasNorthampton).toBe(true);
       }
     });
   });

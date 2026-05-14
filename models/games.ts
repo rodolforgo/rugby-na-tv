@@ -1,6 +1,8 @@
 import type { ApiGame, Broadcast, BroadcastCompareResult, GameData, RoninApiResponse } from "@/domain/games/games.types";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
+import { channelsSchema } from "@/infra/database/schema/channels";
+import { gameChannelsSchema } from "@/infra/database/schema/gameChannels";
 import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
 import { and, gte, lt, desc } from "drizzle-orm";
 
@@ -118,6 +120,17 @@ async function findGamesByDate(date: string) {
     .where(and(gte(gamesSchema.date, start), lt(gamesSchema.date, end)));
 }
 
+async function findOrCreateChannel(name: string): Promise<string> {
+  const existing = await db.query.channelsSchema.findFirst({
+    where: (c, { eq }) => eq(c.name, name),
+  });
+
+  if (existing) return existing.id;
+
+  const [created] = await db.insert(channelsSchema).values({ name }).returning();
+  return created.id;
+}
+
 async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> {
   const [broadcasts, dbGames] = await Promise.all([fetchBroadcastsByDate(date), findGamesByDate(date)]);
 
@@ -126,19 +139,22 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
   let matched = 0;
 
   for (const broadcast of broadcasts) {
-    const found = dbGames.some(
-      (game) =>
-        normalize(broadcast.homeTeam) === normalize(game.homeTeamName) &&
-        normalize(broadcast.visitingTeam) === normalize(game.awayTeamName),
+    const game = dbGames.find(
+      (g) => normalize(broadcast.homeTeam) === normalize(g.homeTeamName) && normalize(broadcast.visitingTeam) === normalize(g.awayTeamName),
     );
-    if (found) {
+
+    if (game) {
       matched++;
+      for (const channel of broadcast.channels) {
+        const channelId = await findOrCreateChannel(channel.name);
+        await db.insert(gameChannelsSchema).values({ gameId: game.id, channelId }).onConflictDoNothing();
+      }
     } else {
       unmatched.push({ homeTeam: broadcast.homeTeam, visitingTeam: broadcast.visitingTeam, league: broadcast.league });
     }
   }
 
-  return { date, roninTotal: broadcasts.length, matched, unmatched };
+  return { date, roninTotal: broadcasts.length, dbGamesTotal: dbGames.length, matched, unmatched };
 }
 
 async function fetchBroadcastsByDate(date: string): Promise<Broadcast[]> {
