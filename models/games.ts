@@ -2,7 +2,7 @@ import type { ApiGame, Broadcast, BroadcastCompareResult, GameData, RoninApiResp
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
 import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
-import { desc } from "drizzle-orm";
+import { and, gte, lt, desc } from "drizzle-orm";
 
 const RUGBY_API_BASE_URL = "https://v1.rugby.api-sports.io";
 
@@ -112,9 +112,10 @@ async function findGamesByDate(date: string) {
   const end = new Date(`${date}T00:00:00Z`);
   end.setUTCDate(end.getUTCDate() + 1);
 
-  return await db.query.gamesSchema.findMany({
-    where: (g, { and, gte, lt }) => and(gte(g.date, start), lt(g.date, end)),
-  });
+  return await db
+    .select()
+    .from(gamesSchema)
+    .where(and(gte(gamesSchema.date, start), lt(gamesSchema.date, end)));
 }
 
 async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> {
