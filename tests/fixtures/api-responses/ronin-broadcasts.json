@@ -1,0 +1,28 @@
+[
+  {
+    "sports": [
+      [
+        {
+          "sports": [
+            {
+              "leagues": [
+                {
+                  "fixtures": [
+                    {
+                      "fixture_id": 12345,
+                      "date": "2026-05-15T18:45:00",
+                      "home_team": "Northampton Saints",
+                      "visiting_team": "Bristol",
+                      "league": "Premiership Rugby",
+                      "channels": [{ "name": "Disney+ Brasil" }]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    ]
+  }
+]

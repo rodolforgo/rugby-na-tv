@@ -1,7 +1,9 @@
 import games from "@/models/games";
-import { cleanDb, runMigrations } from "@/tests/orchestrator";
+import { cleanDb, createTestGame, runMigrations } from "@/tests/orchestrator";
 import { mockGameData } from "@/tests/fixtures/games";
 import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
+import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts.json";
+import { db } from "@/infra/database";
 
 describe("games.fetchByDate()", () => {
   beforeEach(() => {
@@ -121,5 +123,46 @@ describe("games.findById()", () => {
 
     expect(found).toBeDefined();
     expect(found?.homeTeamName).toBe("Bordeaux Begles");
+  });
+});
+
+describe("games.compareBroadcasts()", () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await runMigrations();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test("Salva canal e vínculo com o jogo no banco ao encontrar correspondência", async () => {
+    await createTestGame({
+      homeTeamName: "Northampton Saints",
+      awayTeamName: "Bristol",
+      date: new Date("2026-05-15T18:45:00Z"),
+    });
+
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsFixture,
+    } as Response);
+
+    const result = await games.compareBroadcasts("2026-05-15");
+
+    expect(result.matched).toBe(1);
+    expect(result.roninTotal).toBe(1);
+
+    const channel = await db.query.channelsSchema.findFirst({
+      where: (c, { eq }) => eq(c.name, "Disney+ Brasil"),
+    });
+
+    expect(channel).toBeDefined();
+    expect(channel?.name).toBe("Disney+ Brasil");
+
+    const gameChannel = await db.query.gameChannelsSchema.findFirst({
+      where: (gc, { eq }) => eq(gc.channelId, channel?.id ?? ""),
+    });
+
+    expect(gameChannel).toBeDefined();
   });
 });
