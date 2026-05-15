@@ -1,6 +1,6 @@
 import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/orchestrator";
 
-const COMPARE_URL = "http://localhost:3000/api/v1/games/broadcasts/compare";
+const RONIN_API_URL = "http://localhost:3000/api/v1/games/ronin-api";
 const VALID_TOKEN = process.env.SYNC_SECRET as string;
 const AUTH_HEADER = { Authorization: `Bearer ${VALID_TOKEN}` };
 
@@ -10,16 +10,16 @@ beforeAll(async () => {
   await runMigrations();
 });
 
-describe("GET /api/v1/games/broadcasts/compare", () => {
+describe("GET /api/v1/games/ronin-api", () => {
   describe("Autenticação", () => {
     test("Retorna 401 sem header Authorization", async () => {
-      const response = await fetch(`${COMPARE_URL}?date=2026-05-11`);
+      const response = await fetch(`${RONIN_API_URL}?date=2026-05-11`);
 
       expect(response.status).toBe(401);
     });
 
     test("Retorna 401 com token inválido", async () => {
-      const response = await fetch(`${COMPARE_URL}?date=2026-05-11`, {
+      const response = await fetch(`${RONIN_API_URL}?date=2026-05-11`, {
         headers: { Authorization: "Bearer token_errado" },
       });
 
@@ -29,7 +29,7 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
 
   describe("Validação", () => {
     test("Retorna 400 sem o parâmetro date", async () => {
-      const response = await fetch(COMPARE_URL, {
+      const response = await fetch(RONIN_API_URL, {
         headers: AUTH_HEADER,
       });
 
@@ -39,7 +39,7 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
 
   describe("Comparação de transmissões", () => {
     test("Retorna 200 com estrutura esperada", async () => {
-      const response = await fetch(`${COMPARE_URL}?date=2026-05-11`, {
+      const response = await fetch(`${RONIN_API_URL}?date=2026-05-11`, {
         headers: AUTH_HEADER,
       });
 
@@ -54,7 +54,7 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
     });
 
     test("Sem jogos sincronizados, todos os broadcasts ficam sem correspondência", async () => {
-      const response = await fetch(`${COMPARE_URL}?date=2026-05-11`, {
+      const response = await fetch(`${RONIN_API_URL}?date=2026-05-11`, {
         headers: AUTH_HEADER,
       });
 
@@ -67,7 +67,7 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
     });
 
     test("Cada item sem correspondência retorna os campos esperados", async () => {
-      const response = await fetch(`${COMPARE_URL}?date=2026-05-11`, {
+      const response = await fetch(`${RONIN_API_URL}?date=2026-05-11`, {
         headers: AUTH_HEADER,
       });
 
@@ -90,7 +90,7 @@ describe("GET /api/v1/games/broadcasts/compare", () => {
         date: new Date("2026-05-15T18:45:00Z"),
       });
 
-      const response = await fetch(`${COMPARE_URL}?date=2026-05-15`, {
+      const response = await fetch(`${RONIN_API_URL}?date=2026-05-15`, {
         headers: AUTH_HEADER,
       });
 
