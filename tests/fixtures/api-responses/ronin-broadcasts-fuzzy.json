@@ -1,0 +1,28 @@
+[
+  {
+    "sports": [
+      [
+        {
+          "sports": [
+            {
+              "leagues": [
+                {
+                  "fixtures": [
+                    {
+                      "fixture_id": 99999,
+                      "date": "2026-05-15T10:00:00",
+                      "home_team": "Kaizer Chiefs",
+                      "visiting_team": "Highlanders",
+                      "league": "Super Rugby",
+                      "channels": [{ "name": "ESPN Brasil" }]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    ]
+  }
+]
