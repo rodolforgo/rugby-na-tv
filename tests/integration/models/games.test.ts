@@ -3,6 +3,7 @@ import { cleanDb, createTestGame, runMigrations } from "@/tests/orchestrator";
 import { mockGameData } from "@/tests/fixtures/games";
 import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
 import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts.json";
+import roninBroadcastsFuzzyFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-fuzzy.json";
 import { db } from "@/infra/database";
 
 describe("games.fetchByDate()", () => {
@@ -158,6 +159,36 @@ describe("games.compareBroadcasts()", () => {
 
     expect(channel).toBeDefined();
     expect(channel?.name).toBe("Disney+ Brasil");
+
+    const gameChannel = await db.query.gameChannelsSchema.findFirst({
+      where: (gc, { eq }) => eq(gc.channelId, channel?.id ?? ""),
+    });
+
+    expect(gameChannel).toBeDefined();
+  });
+
+  test("Encontra correspondência via fuzzy match quando nomes são parcialmente iguais", async () => {
+    await createTestGame({
+      homeTeamName: "Chiefs",
+      awayTeamName: "Highlanders",
+      leagueName: "Super Rugby Pacific",
+      date: new Date("2026-05-15T00:00:00Z"),
+    });
+
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsFuzzyFixture,
+    } as Response);
+
+    const result = await games.compareBroadcasts("2026-05-15");
+
+    expect(result.matched).toBe(1);
+    expect(result.unmatched).toHaveLength(0);
+
+    const channel = await db.query.channelsSchema.findFirst({
+      where: (c, { eq }) => eq(c.name, "ESPN Brasil"),
+    });
+
+    expect(channel).toBeDefined();
 
     const gameChannel = await db.query.gameChannelsSchema.findFirst({
       where: (gc, { eq }) => eq(gc.channelId, channel?.id ?? ""),

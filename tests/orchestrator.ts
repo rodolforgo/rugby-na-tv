@@ -81,14 +81,14 @@ export async function setTokenExpires(email: string, expires: Date) {
   await db.update(verificationTokensSchema).set({ expires }).where(eq(verificationTokensSchema.identifier, email));
 }
 
-export async function createTestGame(options: { homeTeamName: string; awayTeamName: string; date: Date }) {
+export async function createTestGame(options: { homeTeamName: string; awayTeamName: string; date: Date; leagueName?: string }) {
   const [game] = await db
     .insert(gamesSchema)
     .values({
       date: options.date,
       timestamp: Math.floor(options.date.getTime() / 1000),
       countryName: "Test",
-      leagueName: "Test League",
+      leagueName: options.leagueName ?? "Test League",
       homeTeamName: options.homeTeamName,
       awayTeamName: options.awayTeamName,
       scoresHome: null,
