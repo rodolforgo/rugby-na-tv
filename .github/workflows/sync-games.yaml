@@ -14,7 +14,7 @@ jobs:
       - name: Sincronizar jogos de hoje
         run: |
           TODAY=$(date -u +%Y-%m-%d)
-          curl --fail -X POST ${{ vars.APP_URL }}/api/v1/games/sync \
+          curl --fail -X POST ${{ vars.APP_URL }}/api/v1/games/api-sports \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}" \
             -d "{\"date\": \"$TODAY\"}"
@@ -22,7 +22,7 @@ jobs:
       - name: Sincronizar jogos de amanhã
         run: |
           TOMORROW=$(date -u -d "+1 day" +%Y-%m-%d)
-          curl --fail -X POST ${{ vars.APP_URL }}/api/v1/games/sync \
+          curl --fail -X POST ${{ vars.APP_URL }}/api/v1/games/api-sports \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}" \
             -d "{\"date\": \"$TOMORROW\"}"
