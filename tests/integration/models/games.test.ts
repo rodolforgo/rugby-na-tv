@@ -1,10 +1,14 @@
 import games from "@/models/games";
-import { cleanDb, createTestGame, runMigrations } from "@/tests/orchestrator";
+import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/orchestrator";
 import { mockGameData } from "@/tests/fixtures/games";
 import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
 import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts.json";
 import roninBroadcastsFuzzyFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-fuzzy.json";
 import { db } from "@/infra/database";
+
+beforeAll(async () => {
+  await waitWebServer();
+});
 
 describe("games.fetchByDate()", () => {
   beforeEach(() => {

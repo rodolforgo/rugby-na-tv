@@ -1,4 +1,4 @@
-import type { ApiGame, Broadcast, BroadcastCompareResult, GameData, RoninApiResponse } from "@/domain/games/games.types";
+import type { ApiGame, Broadcast, BroadcastCompareResult, GameData, GameWithChannels, RoninApiResponse } from "@/domain/games/games.types";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
 import { channelsSchema } from "@/infra/database/schema/channels";
@@ -94,6 +94,43 @@ async function syncByDate(date: string) {
 }
 
 // --- Consultas de jogos ---
+
+async function listForDisplay(): Promise<GameWithChannels[]> {
+  const today = new Date();
+  const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
+  const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 2));
+
+  const rows = await db.query.gamesSchema.findMany({
+    where: (g, { and, gte, lt }) => and(gte(g.date, start), lt(g.date, end)),
+    orderBy: (g, { asc }) => [asc(g.date)],
+    with: {
+      gameChannels: {
+        with: { channel: true },
+      },
+    },
+  });
+
+  return rows.map((game) => ({
+    id: game.id,
+    date: game.date,
+    leagueName: game.leagueName,
+    leagueLogo: game.leagueLogo,
+    countryName: game.countryName,
+    countryFlag: game.countryFlag,
+    homeTeamName: game.homeTeamName,
+    homeTeamLogo: game.homeTeamLogo,
+    awayTeamName: game.awayTeamName,
+    awayTeamLogo: game.awayTeamLogo,
+    scoresHome: game.scoresHome,
+    scoresAway: game.scoresAway,
+    channels: game.gameChannels.map((gc) => ({
+      id: gc.channel.id,
+      name: gc.channel.name,
+      logo: gc.channel.logo,
+      url: gc.channel.url,
+    })),
+  }));
+}
 
 async function findById(id: string) {
   return await db.query.gamesSchema.findFirst({
@@ -217,6 +254,7 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
 }
 
 const games = {
+  listForDisplay,
   fetchByDate,
   saveGames,
   createGame,
