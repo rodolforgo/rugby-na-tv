@@ -1,5 +1,5 @@
 import users from "@/models/users";
-import { cleanDb, createTestUser, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, createTestUser, runMigrations, waitWebServer } from "@/tests/helpers";
 
 beforeAll(async () => {
   await waitWebServer();

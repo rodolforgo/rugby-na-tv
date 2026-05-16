@@ -1,4 +1,4 @@
-import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/helpers";
 import { db } from "@/infra/database";
 import { channelsSchema } from "@/infra/database/schema/channels";
 import { gameChannelsSchema } from "@/infra/database/schema/gameChannels";

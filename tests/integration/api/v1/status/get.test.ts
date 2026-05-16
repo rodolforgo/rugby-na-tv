@@ -1,5 +1,5 @@
 import { statusResponseSchema } from "@/domain/status/status.schema";
-import { waitWebServer } from "@/tests/orchestrator";
+import { waitWebServer } from "@/tests/helpers";
 
 beforeAll(async () => {
   await waitWebServer();

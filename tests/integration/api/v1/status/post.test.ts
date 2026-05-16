@@ -1,4 +1,4 @@
-import { waitWebServer } from "@/tests/orchestrator";
+import { waitWebServer } from "@/tests/helpers";
 
 beforeAll(async () => {
   await waitWebServer();

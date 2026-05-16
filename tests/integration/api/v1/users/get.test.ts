@@ -1,4 +1,4 @@
-import { cleanDb, runMigrations, waitWebServer, createTestUser } from "@/tests/orchestrator";
+import { cleanDb, runMigrations, waitWebServer, createTestUser } from "@/tests/helpers";
 
 beforeAll(async () => {
   await waitWebServer();

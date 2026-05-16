@@ -1,4 +1,4 @@
-import { cleanDb, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, runMigrations, waitWebServer } from "@/tests/helpers";
 
 const API_SPORTS_URL = "http://localhost:3000/api/v1/games/api-sports";
 const VALID_TOKEN = process.env.SYNC_SECRET as string;

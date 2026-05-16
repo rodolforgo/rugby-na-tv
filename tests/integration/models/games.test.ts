@@ -1,5 +1,5 @@
 import games from "@/models/games";
-import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/helpers";
 import { mockGameData } from "@/tests/fixtures/games";
 import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
 import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts.json";
