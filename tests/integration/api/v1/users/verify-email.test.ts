@@ -12,7 +12,7 @@ import {
   getLastVerificationToken,
   runMigrations,
   waitWebServer,
-} from "@/tests/orchestrator";
+} from "@/tests/helpers";
 
 beforeAll(async () => {
   await waitWebServer();

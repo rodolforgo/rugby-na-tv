@@ -2,7 +2,7 @@ import { db } from "@/infra/database";
 import { verificationTokensSchema } from "@/infra/database/schema/verificationTokens";
 import { eq } from "drizzle-orm";
 import users from "@/models/users";
-import { cleanDb, clearMailcatcher, getLastVerificationToken, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, clearMailcatcher, getLastVerificationToken, runMigrations, waitWebServer } from "@/tests/helpers";
 
 beforeAll(async () => {
   await waitWebServer();

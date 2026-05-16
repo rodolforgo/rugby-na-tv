@@ -1,4 +1,4 @@
-import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/orchestrator";
+import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/helpers";
 
 const RONIN_API_URL = "http://localhost:3000/api/v1/games/ronin-api";
 const VALID_TOKEN = process.env.SYNC_SECRET as string;

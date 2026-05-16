@@ -13,7 +13,7 @@ import {
   setTokenExpires,
   verifyUserEmail,
   waitWebServer,
-} from "@/tests/orchestrator";
+} from "@/tests/helpers";
 
 const RESEND_URL = "http://localhost:3000/api/v1/users/verify-email/resend";
 
