@@ -26,6 +26,22 @@ export type GameData = {
 
 export type Game = GameData & { id: string };
 
+export type GameWithChannels = {
+  id: string;
+  date: Date;
+  leagueName: string;
+  leagueLogo: string | null;
+  countryName: string;
+  countryFlag: string | null;
+  homeTeamName: string;
+  homeTeamLogo: string | null;
+  awayTeamName: string;
+  awayTeamLogo: string | null;
+  scoresHome: number | null;
+  scoresAway: number | null;
+  channels: { id: string; name: string; logo: string | null; url: string | null }[];
+};
+
 export type BroadcastCompareResult = {
   date: string;
   roninTotal: number;
