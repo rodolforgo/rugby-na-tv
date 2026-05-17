@@ -23,8 +23,7 @@ export const GET = controller.errorHandler(async () => {
 
   const mailerStatus = await mailer.checkConnection();
   const lastSync = await games.getLastSync().catch(() => null);
-  const today = new Date().toISOString().split("T")[0];
-  const broadcastCompare = await games.compareBroadcasts(today).catch(() => null);
+  const lastBroadcastLog = await games.getLastBroadcastLog().catch(() => null);
 
   const res = {
     updated_at: updatedAt,
@@ -35,7 +34,7 @@ export const GET = controller.errorHandler(async () => {
     },
     mailer: mailerStatus,
     lastSync: lastSync ?? null,
-    broadcastCompare: broadcastCompare ?? null,
+    lastBroadcastLog: lastBroadcastLog ?? null,
   };
 
   return NextResponse.json(res);
