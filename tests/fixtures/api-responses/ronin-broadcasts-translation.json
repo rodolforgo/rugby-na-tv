@@ -1,0 +1,28 @@
+[
+  {
+    "sports": [
+      [
+        {
+          "sports": [
+            {
+              "leagues": [
+                {
+                  "fixtures": [
+                    {
+                      "fixture_id": 88888,
+                      "date": "2026-05-17T08:15:00",
+                      "home_team": "Gales",
+                      "visiting_team": "Itália",
+                      "league": "Women's Six Nations",
+                      "channels": [{ "name": "Canal W" }]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    ]
+  }
+]

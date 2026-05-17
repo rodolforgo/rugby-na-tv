@@ -57,6 +57,13 @@
       "when": 1778758493482,
       "tag": "0007_condemned_dark_phoenix",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779060898490,
+      "tag": "0008_natural_bushwacker",
+      "breakpoints": true
     }
   ]
 }

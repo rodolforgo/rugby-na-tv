@@ -7,6 +7,7 @@ import { gamesSchema } from "./games";
 import { channelsSchema } from "./channels";
 import { gameChannelsSchema } from "./gameChannels";
 import { syncLogsSchema } from "./syncLogs";
+import { broadcastLogsSchema } from "./broadcastLogs";
 import { gamesRelations, channelsRelations, gameChannelsRelations } from "./relations";
 
 export const schema = {
@@ -19,6 +20,7 @@ export const schema = {
   channelsSchema,
   gameChannelsSchema,
   syncLogsSchema,
+  broadcastLogsSchema,
   gamesRelations,
   channelsRelations,
   gameChannelsRelations,

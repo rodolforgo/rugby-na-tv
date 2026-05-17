@@ -4,6 +4,7 @@ import { mockGameData } from "@/tests/fixtures/games";
 import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
 import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts.json";
 import roninBroadcastsFuzzyFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-fuzzy.json";
+import roninBroadcastsTranslationFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-translation.json";
 import { db } from "@/infra/database";
 
 beforeAll(async () => {
@@ -199,5 +200,29 @@ describe("games.compareBroadcasts()", () => {
     });
 
     expect(gameChannel).toBeDefined();
+  });
+
+  test("Encontra correspondência quando nomes dos times estão em português e liga está reordenada", async () => {
+    await createTestGame({
+      homeTeamName: "Wales W",
+      awayTeamName: "Italy W",
+      leagueName: "Six Nations Women",
+      date: new Date("2026-05-17T11:15:00Z"),
+    });
+
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsTranslationFixture,
+    } as Response);
+
+    const result = await games.compareBroadcasts("2026-05-17");
+
+    expect(result.matched).toBe(1);
+    expect(result.unmatched).toHaveLength(0);
+
+    const channel = await db.query.channelsSchema.findFirst({
+      where: (c, { eq }) => eq(c.name, "Canal W"),
+    });
+
+    expect(channel).toBeDefined();
   });
 });

@@ -1,14 +1,14 @@
 import type { ApiGame, Broadcast, BroadcastCompareResult, GameData, GameWithChannels, RoninApiResponse } from "@/domain/games/games.types";
+import { translateTeamName, tokenMatch } from "@/domain/games/translations";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
 import { channelsSchema } from "@/infra/database/schema/channels";
 import { gameChannelsSchema } from "@/infra/database/schema/gameChannels";
 import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
+import { broadcastLogsSchema } from "@/infra/database/schema/broadcastLogs";
 import { and, gte, lt, desc } from "drizzle-orm";
 
 const RUGBY_API_BASE_URL = "https://v1.rugby.api-sports.io";
-
-// --- Sync de jogos ---
 
 async function fetchByDate(date: string): Promise<GameData[]> {
   const response = await fetch(`${RUGBY_API_BASE_URL}/games?date=${date}`, {
@@ -93,8 +93,6 @@ async function syncByDate(date: string) {
   return { date, gamesTotal: gamesList.length, syncedAt: log.created_at };
 }
 
-// --- Consultas de jogos ---
-
 async function listForDisplay(): Promise<GameWithChannels[]> {
   const today = new Date();
   const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
@@ -161,8 +159,6 @@ async function getLastSync() {
   });
 }
 
-// --- Compare de transmissões ---
-
 async function fetchBroadcastsByDate(date: string): Promise<Broadcast[]> {
   const url = `https://api2.roninmedia.io/2/fixtures/grouped?token=${process.env.RONIN_API_TOKEN}&day=${date}&dayBreakHour=0&tz=America/Sao_Paulo&sportId=8`;
   const response = await fetch(url);
@@ -202,10 +198,12 @@ function normalize(s: string): string {
 function scoreMatch(broadcast: Broadcast, game: { homeTeamName: string; awayTeamName: string; leagueName: string; date: Date }): number {
   let score = 0;
   const partial = (a: string, b: string) => normalize(a).includes(normalize(b)) || normalize(b).includes(normalize(a));
+  const teamMatch = (broadcastName: string, dbName: string) =>
+    partial(broadcastName, dbName) || translateTeamName(broadcastName) === translateTeamName(dbName);
 
-  if (partial(broadcast.homeTeam, game.homeTeamName)) score++;
-  if (partial(broadcast.visitingTeam, game.awayTeamName)) score++;
-  if (partial(broadcast.league, game.leagueName)) score++;
+  if (teamMatch(broadcast.homeTeam, game.homeTeamName)) score++;
+  if (teamMatch(broadcast.visitingTeam, game.awayTeamName)) score++;
+  if (partial(broadcast.league, game.leagueName) || tokenMatch(broadcast.league, game.leagueName)) score++;
 
   const broadcastTime = broadcast.date.slice(11, 16);
   const dbHour = game.date.getUTCHours().toString().padStart(2, "0");
@@ -250,7 +248,23 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
     }
   }
 
-  return { date, roninTotal: broadcasts.length, dbGamesTotal: dbGames.length, matched, unmatched };
+  const result = { date, roninTotal: broadcasts.length, dbGamesTotal: dbGames.length, matched, unmatched };
+
+  await db.insert(broadcastLogsSchema).values({
+    syncedDate: date,
+    roninTotal: result.roninTotal,
+    dbGamesTotal: result.dbGamesTotal,
+    matched: result.matched,
+    unmatched: result.unmatched,
+  });
+
+  return result;
+}
+
+async function getLastBroadcastLog() {
+  return await db.query.broadcastLogsSchema.findFirst({
+    orderBy: [desc(broadcastLogsSchema.created_at)],
+  });
 }
 
 const games = {
@@ -265,6 +279,7 @@ const games = {
   getLastSync,
   fetchBroadcastsByDate,
   compareBroadcasts,
+  getLastBroadcastLog,
 };
 
 export default games;
