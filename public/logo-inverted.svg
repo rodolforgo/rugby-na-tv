@@ -1,0 +1,14 @@
+<svg viewBox="0 0 220 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rugby na TV">
+  <title>Rugby na TV</title>
+  <defs>
+    <radialGradient id="ballGradientInverted" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e5e5e5" />
+    </radialGradient>
+  </defs>
+  <ellipse cx="115" cy="70" rx="70" ry="44" fill="white" opacity="0.2" transform="rotate(-25 115 70)" />
+  <ellipse cx="100" cy="55" rx="70" ry="44" fill="url(#ballGradientInverted)" />
+  <text x="100" y="69" text-anchor="middle" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="38" font-weight="800" letter-spacing="2">
+    <tspan fill="#0d2b5e">R</tspan><tspan fill="#1e4380">TV</tspan>
+  </text>
+</svg>
