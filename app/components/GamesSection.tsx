@@ -56,9 +56,7 @@ export default function GamesSection({ games }: Props) {
           <div className="flex flex-col gap-6">
             {Object.entries(groupedByLeague).map(([league, leagueGames]) => (
               <div key={league}>
-                <h3 className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-1 px-3">
-                  {league}
-                </h3>
+                <h3 className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-1 px-3">{league}</h3>
                 <div className="border border-base-300 rounded-lg overflow-hidden">
                   {leagueGames.map((game) => (
                     <GameRow key={game.id} game={game} />

@@ -102,8 +102,8 @@ export default function Home() {
     <main className="min-h-screen bg-base-100">
       <section className="bg-base-100 py-4">
         <p className="text-xs text-base-content/50 text-center px-6 max-w-2xl mx-auto">
-          Esta plataforma não distribui, hospeda ou intermedia conteúdo audiovisual, limitando-se à divulgação de grade
-          de programação de emissoras e serviços de streaming autorizados.
+          Esta plataforma não distribui, hospeda ou intermedia conteúdo audiovisual, limitando-se à divulgação de grade de programação de
+          emissoras e serviços de streaming autorizados.
         </p>
       </section>
 

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, timestamp, date, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, uuid, integer, timestamp, date, jsonb } from "drizzle-orm/pg-core";
 
 export const broadcastLogsSchema = pgTable("broadcast_logs", {
   id: uuid().defaultRandom().primaryKey(),

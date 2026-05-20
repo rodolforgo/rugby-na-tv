@@ -19,6 +19,7 @@ export default function DateSelector({ selected, onChange }: Props) {
       {options.map((option) => (
         <button
           key={option.value}
+          type="button"
           role="tab"
           className={`tab ${selected === option.value ? "tab-active" : ""}`}
           onClick={() => onChange(option.value)}
