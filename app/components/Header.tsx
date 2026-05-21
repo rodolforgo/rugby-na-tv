@@ -4,7 +4,7 @@ export default function Header() {
       <div className="max-w-5xl mx-auto w-full px-6">
         <a href="/" className="flex flex-col items-center gap-0.5">
           <img src="/logo.svg" alt="Rugby na TV" className="h-8 w-auto" />
-          <span className="text-xs font-semibold tracking-wide">Rugby na TV</span>
+          <span className="text-sm font-semibold tracking-wide">Rugby na TV</span>
         </a>
       </div>
     </header>

@@ -26,7 +26,6 @@ export default function GameRow({ game, isLoggedIn, onVote, onVoteSettled }: Pro
   const [selectedChannelId, setSelectedChannelId] = useState(game.allChannels[0]?.id ?? "");
   const [isPending, startTransition] = useTransition();
 
-  const hasScore = game.scoresHome !== null && game.scoresAway !== null;
   const votedChannels = game.allChannels.filter((c) => c.upvoteCount > 0 || c.downvoteCount > 0);
 
   function vote(channelId: string, voteType: "upvote" | "downvote") {
@@ -71,30 +70,26 @@ export default function GameRow({ game, isLoggedIn, onVote, onVoteSettled }: Pro
     <>
       <div className="py-2 px-3 text-sm">
         <div className="flex items-center gap-3">
-          <span className="text-base-content/40 w-10 shrink-0 text-xs">{formatTime(new Date(game.date))}</span>
+          <span className="w-10 shrink-0 text-xs text-base-content/40">{formatTime(new Date(game.date))}</span>
 
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <TeamLogo logo={game.homeTeamLogo} name={game.homeTeamName} size="sm" />
-            <span className="text-base-content font-medium truncate">{game.homeTeamName}</span>
-          </div>
-
-          <span className="text-base-content/50 font-semibold shrink-0 text-xs">
-            {hasScore ? `${game.scoresHome} – ${game.scoresAway}` : "×"}
-          </span>
-
-          <div className="flex flex-col items-end gap-1 flex-1 min-w-0">
-            <div className="flex items-center gap-2 justify-end w-full">
-              <span className="text-base-content font-medium truncate text-right">{game.awayTeamName}</span>
-              <TeamLogo logo={game.awayTeamLogo} name={game.awayTeamName} size="sm" />
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <TeamLogo logo={game.homeTeamLogo} name={game.homeTeamName} size="sm" />
+              <span className="text-base-content font-medium truncate">{game.homeTeamName}</span>
             </div>
-            <button type="button" onClick={openModal} className="text-xs text-primary/60 hover:text-primary transition-colors">
-              + Indicar transmissão
-            </button>
+            <div className="flex items-center gap-2">
+              <TeamLogo logo={game.awayTeamLogo} name={game.awayTeamName} size="sm" />
+              <span className="text-base-content font-medium truncate">{game.awayTeamName}</span>
+            </div>
           </div>
+
+          <button type="button" onClick={openModal} className="text-xs text-primary/60 hover:text-primary transition-colors shrink-0">
+            + Indicar transmissão
+          </button>
         </div>
 
         {votedChannels.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2 ml-12">
+          <div className="flex flex-wrap gap-1.5 mt-2 ml-14">
             {votedChannels.map((channel) => (
               <ChannelPill key={channel.id} channel={channel} onVote={vote} isPending={isPending} />
             ))}

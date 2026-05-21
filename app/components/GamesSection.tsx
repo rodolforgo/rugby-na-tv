@@ -167,7 +167,7 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
                 <h3 className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-1 px-3">
                   {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
                 </h3>
-                <div className="border border-base-300 rounded-lg overflow-hidden">
+                <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
                   {leagueGames.map((game) => (
                     <GameRow
                       key={game.id}
