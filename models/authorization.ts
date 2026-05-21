@@ -4,7 +4,8 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { UnauthorizedError } from "@/infra/errors";
-import type { AuthOptions } from "next-auth";
+import type { AuthOptions, Session } from "next-auth";
+import type { AdapterUser } from "next-auth/adapters";
 import Credentials from "next-auth/providers/credentials";
 
 const authOptions: AuthOptions = {
@@ -44,6 +45,12 @@ const authOptions: AuthOptions = {
       },
     }),
   ],
+  callbacks: {
+    session: ({ session, user }: { session: Session; user: AdapterUser }) => ({
+      ...session,
+      user: { ...session.user, id: user.id },
+    }),
+  },
   pages: {
     signIn: "/login",
   },

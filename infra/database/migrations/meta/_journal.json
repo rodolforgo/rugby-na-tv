@@ -64,6 +64,13 @@
       "when": 1779060898490,
       "tag": "0008_natural_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1779385105107,
+      "tag": "0009_illegal_gorilla_man",
+      "breakpoints": true
     }
   ]
 }

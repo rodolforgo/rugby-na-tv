@@ -102,4 +102,15 @@ describe("GET /api/v1/users/verify-email", () => {
 
     expect(await users.hasFeature(user.id, "read:activation_token")).toBe(false);
   });
+
+  test("Com token válido concede feature vote:games após verificação do email", async () => {
+    const user = await createTestUser();
+    const token = await createTestToken(user.email);
+
+    expect(await users.hasFeature(user.id, "vote:games")).toBe(false);
+
+    await fetch(`http://localhost:3000/api/v1/users/verify-email?token=${token}`);
+
+    expect(await users.hasFeature(user.id, "vote:games")).toBe(true);
+  });
 });

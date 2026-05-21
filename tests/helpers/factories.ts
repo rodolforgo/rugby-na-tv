@@ -2,6 +2,7 @@ import { db } from "@/infra/database";
 import { usersSchema } from "@/infra/database/schema/users";
 import { verificationTokensSchema } from "@/infra/database/schema/verificationTokens";
 import { gamesSchema } from "@/infra/database/schema/games";
+import { channelsSchema } from "@/infra/database/schema/channels";
 import users from "@/models/users";
 import { eq } from "drizzle-orm";
 
@@ -40,6 +41,31 @@ export async function createTestToken(email: string, options?: { expiresAt?: Dat
 
 export async function setTokenExpires(email: string, expires: Date) {
   await db.update(verificationTokensSchema).set({ expires }).where(eq(verificationTokensSchema.identifier, email));
+}
+
+export async function createAuthenticatedUser(options?: { email?: string; password?: string }) {
+  const user = await createTestUser(options);
+  await verifyUserEmail(user.id);
+  await users.addFeatureToUser(user.id, "vote:games");
+
+  const sessionResponse = await fetch("http://localhost:3000/api/v1/sessions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: user.email, password: user.rawPassword }),
+  });
+
+  const setCookie = sessionResponse.headers.get("Set-Cookie") ?? "";
+  const sessionToken = setCookie.match(/session_token=([^;]+)/)?.[1] ?? "";
+
+  return { ...user, sessionToken };
+}
+
+export async function createTestChannel(options?: { name?: string }) {
+  const [channel] = await db
+    .insert(channelsSchema)
+    .values({ name: options?.name ?? `channel_${crypto.randomUUID()}` })
+    .returning();
+  return channel;
 }
 
 export async function createTestGame(options: { homeTeamName: string; awayTeamName: string; date: Date; leagueName?: string }) {

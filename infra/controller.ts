@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { InternalServerError, MethodNotAllowedError, ServiceError, UnauthorizedError, ValidationError } from "./errors";
 
-function errorHandler(handler: (req: Request) => Promise<Response> | Response) {
-  return async (req: Request): Promise<Response> => {
+function errorHandler(handler: (req: Request, context: unknown) => Promise<Response> | Response) {
+  return async (req: Request, context: unknown): Promise<Response> => {
     try {
-      return await handler(req);
+      return await handler(req, context);
     } catch (error) {
       if (
         error instanceof ServiceError ||

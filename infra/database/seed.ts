@@ -4,7 +4,7 @@ import { gamesSchema } from "@/infra/database/schema/games";
 import { channelsSchema } from "@/infra/database/schema/channels";
 import { gameChannelsSchema } from "@/infra/database/schema/gameChannels";
 
-const knownFeatures = ["read:activation_token"];
+const knownFeatures = ["read:activation_token", "vote:games"];
 
 async function seedFeatures() {
   for (const name of knownFeatures) {
@@ -164,6 +164,13 @@ const channelsSeed = [
   { name: "Canal W", logo: null, url: null },
 ];
 
+async function seedChannels() {
+  for (const channel of channelsSeed) {
+    await db.insert(channelsSchema).values(channel).onConflictDoNothing();
+  }
+  console.log(`Canais inseridos: ${channelsSeed.length}`);
+}
+
 const broadcastLinks: Record<number, string[]> = {
   90001: ["Disney+ Brasil"],
   90002: ["ESPN Brasil", "Star+"],
@@ -178,9 +185,7 @@ async function seedGames() {
     await db.insert(gamesSchema).values(game).onConflictDoNothing();
   }
 
-  for (const channel of channelsSeed) {
-    await db.insert(channelsSchema).values(channel).onConflictDoNothing();
-  }
+  await seedChannels();
 
   for (const [apiId, channelNames] of Object.entries(broadcastLinks)) {
     const game = await db.query.gamesSchema.findFirst({
@@ -199,10 +204,9 @@ async function seedGames() {
   }
 
   console.log(`Jogos inseridos: ${gamesSeed.length}`);
-  console.log(`Canais inseridos: ${channelsSeed.length}`);
   console.log(`Links de transmissão: ${Object.values(broadcastLinks).flat().length}`);
 }
 
-const seed = { seedFeatures, seedGames };
+const seed = { seedFeatures, seedChannels, seedGames };
 
 export default seed;
