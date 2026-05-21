@@ -5,3 +5,10 @@ export const syncGamesSchema = z.object({
 });
 
 export type SyncGamesSchema = z.infer<typeof syncGamesSchema>;
+
+export const castVoteSchema = z.object({
+  channelId: z.string().uuid("channelId inválido."),
+  voteType: z.enum(["upvote", "downvote"]),
+});
+
+export type CastVoteSchema = z.infer<typeof castVoteSchema>;

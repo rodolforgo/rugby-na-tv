@@ -9,6 +9,7 @@ const target = process.argv[2];
 
 const runners: Record<string, string> = {
   features: "seedFeatures",
+  channels: "seedChannels",
   games: "seedGames",
 };
 

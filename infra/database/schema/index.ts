@@ -8,7 +8,8 @@ import { channelsSchema } from "./channels";
 import { gameChannelsSchema } from "./gameChannels";
 import { syncLogsSchema } from "./syncLogs";
 import { broadcastLogsSchema } from "./broadcastLogs";
-import { gamesRelations, channelsRelations, gameChannelsRelations } from "./relations";
+import { gamesRelations, channelsRelations, gameChannelsRelations, userGameChannelVotesRelations } from "./relations";
+import { userGameChannelVotesSchema } from "./userGameChannelVotes";
 
 export const schema = {
   usersSchema,
@@ -21,7 +22,9 @@ export const schema = {
   gameChannelsSchema,
   syncLogsSchema,
   broadcastLogsSchema,
+  userGameChannelVotesSchema,
   gamesRelations,
   channelsRelations,
   gameChannelsRelations,
+  userGameChannelVotesRelations,
 };

@@ -3,9 +3,11 @@ import { and, eq } from "drizzle-orm";
 import { usersSchema } from "@/infra/database/schema/users";
 import { featuresSchema } from "@/infra/database/schema/features";
 import { userFeaturesSchema } from "@/infra/database/schema/userFeatures";
+import { sessionSchema } from "@/infra/database/schema/sessions";
 import { ValidationError, UnauthorizedError } from "@/infra/errors";
 import type { CreateUserSchema } from "@/domain/users/users.schema";
 import bcrypt from "bcrypt";
+import { cookies } from "next/headers";
 
 async function validateUniqueEmail(email: string) {
   const existingUser = await db.query.usersSchema.findFirst({
@@ -91,6 +93,23 @@ async function hasFeature(userId: string, featureName: string): Promise<boolean>
   return features.includes(featureName);
 }
 
+async function requireFeature(featureName: string): Promise<string> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session_token")?.value;
+  if (!token) throw new UnauthorizedError();
+
+  const session = await db.query.sessionSchema.findFirst({
+    where: eq(sessionSchema.sessionToken, token),
+  });
+
+  if (!session || session.expires < new Date()) throw new UnauthorizedError();
+
+  const allowed = await hasFeature(session.userId, featureName);
+  if (!allowed) throw new UnauthorizedError();
+
+  return session.userId;
+}
+
 const users = {
   validateUniqueEmail,
   createNewUser,
@@ -100,6 +119,7 @@ const users = {
   removeFeatureFromUser,
   getUserFeatures,
   hasFeature,
+  requireFeature,
 };
 
 export default users;
