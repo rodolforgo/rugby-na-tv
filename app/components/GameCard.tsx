@@ -27,6 +27,7 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
   const [isPending, startTransition] = useTransition();
 
   const hasScore = game.scoresHome !== null && game.scoresAway !== null;
+  const isFromRonin = game.channels.length > 0;
   const officialChannels = game.channels;
   const communityChannels = game.allChannels.filter((c) => c.isCommunity && c.upvoteCount > 0);
   const visibleChannels = [...officialChannels, ...communityChannels];
@@ -106,26 +107,16 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
 
           <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-base-200">
             {officialChannels.map((channel) => (
-              <ChannelVoteBadge
-                key={channel.id}
-                channel={
-                  game.allChannels.find((c) => c.id === channel.id) ?? {
-                    ...channel,
-                    upvoteCount: 0,
-                    downvoteCount: 0,
-                    userVote: null,
-                    isCommunity: false,
-                  }
-                }
-                onVote={vote}
-                isPending={isPending}
-                variant="primary"
-              />
+              <div key={channel.id} className="flex items-center gap-1 badge badge-soft badge-primary text-xs">
+                {channel.logo ? <img src={channel.logo} alt={channel.name} className="w-3 h-3 object-contain" /> : null}
+                {channel.name}
+              </div>
             ))}
-            {communityChannels.map((channel) => (
-              <ChannelVoteBadge key={channel.id} channel={channel} onVote={vote} variant="success" isPending={isPending} />
-            ))}
-            {availableForSuggestion.length > 0 && (
+            {!isFromRonin &&
+              communityChannels.map((channel) => (
+                <ChannelVoteBadge key={channel.id} channel={channel} onVote={vote} variant="success" isPending={isPending} />
+              ))}
+            {!isFromRonin && availableForSuggestion.length > 0 && (
               <button type="button" onClick={openModal} className="text-xs text-primary/60 hover:text-primary transition-colors px-1">
                 + Indicar
               </button>
