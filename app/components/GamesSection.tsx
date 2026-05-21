@@ -25,6 +25,17 @@ function groupByLeague(games: GameWithChannels[]): Record<string, GameWithChanne
   );
 }
 
+function getSpDateString(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(date);
+}
+
+function getTargetDateString(option: DateOption): string {
+  const now = new Date();
+  if (option === "yesterday") now.setDate(now.getDate() - 1);
+  if (option === "tomorrow") now.setDate(now.getDate() + 1);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(now);
+}
+
 function getDateLabel(option: DateOption): string {
   const date = new Date();
   if (option === "yesterday") date.setDate(date.getDate() - 1);
@@ -43,8 +54,10 @@ function getDateLabel(option: DateOption): string {
 export default function GamesSection({ games }: Props) {
   const [selected, setSelected] = useState<DateOption>("today");
 
-  const withBroadcast = games.filter((g) => g.channels.length > 0);
-  const withoutBroadcast = games.filter((g) => g.channels.length === 0);
+  const targetDate = getTargetDateString(selected);
+  const gamesForDay = games.filter((g) => getSpDateString(new Date(g.date)) === targetDate);
+  const withBroadcast = gamesForDay.filter((g) => g.channels.length > 0);
+  const withoutBroadcast = gamesForDay.filter((g) => g.channels.length === 0);
   const groupedByLeague = groupByLeague(withoutBroadcast);
 
   return (
