@@ -25,6 +25,17 @@ function groupByLeague(games: GameWithChannels[]): Record<string, GameWithChanne
   );
 }
 
+function getSpDateString(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(date);
+}
+
+function getTargetDateString(option: DateOption): string {
+  const now = new Date();
+  if (option === "yesterday") now.setDate(now.getDate() - 1);
+  if (option === "tomorrow") now.setDate(now.getDate() + 1);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(now);
+}
+
 function getDateLabel(option: DateOption): string {
   const date = new Date();
   if (option === "yesterday") date.setDate(date.getDate() - 1);
@@ -43,9 +54,17 @@ function getDateLabel(option: DateOption): string {
 export default function GamesSection({ games }: Props) {
   const [selected, setSelected] = useState<DateOption>("today");
 
-  const withBroadcast = games.filter((g) => g.channels.length > 0);
-  const withoutBroadcast = games.filter((g) => g.channels.length === 0);
+  const targetDate = getTargetDateString(selected);
+  const gamesForDay = games.filter((g) => getSpDateString(new Date(g.date)) === targetDate);
+  const withBroadcast = gamesForDay.filter((g) => g.channels.length > 0);
+  const withoutBroadcast = gamesForDay.filter((g) => g.channels.length === 0);
   const groupedByLeague = groupByLeague(withoutBroadcast);
+
+  const tomorrowWithBroadcast =
+    selected === "today" && withBroadcast.length === 0
+      ? games.filter((g) => getSpDateString(new Date(g.date)) === getTargetDateString("tomorrow") && g.channels.length > 0)
+      : [];
+  const showTomorrowFallback = tomorrowWithBroadcast.length > 0;
 
   return (
     <>
@@ -67,6 +86,20 @@ export default function GamesSection({ games }: Props) {
           <p className="text-sm text-base-content/40">Nenhum jogo com transmissão confirmada para este dia.</p>
         )}
       </section>
+
+      {showTomorrowFallback && (
+        <section className="max-w-5xl mx-auto px-6 pb-8">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-base-content">{titles.tomorrow}</h2>
+            <p className="text-xs text-base-content/40 mt-0.5">{getDateLabel("tomorrow")}</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {tomorrowWithBroadcast.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="max-w-5xl mx-auto px-6 pb-12">
         <h2 className="text-lg font-semibold text-base-content mb-4">Outros jogos do dia</h2>
