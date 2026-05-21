@@ -60,6 +60,12 @@ export default function GamesSection({ games }: Props) {
   const withoutBroadcast = gamesForDay.filter((g) => g.channels.length === 0);
   const groupedByLeague = groupByLeague(withoutBroadcast);
 
+  const tomorrowWithBroadcast =
+    selected === "today" && withBroadcast.length === 0
+      ? games.filter((g) => getSpDateString(new Date(g.date)) === getTargetDateString("tomorrow") && g.channels.length > 0)
+      : [];
+  const showTomorrowFallback = tomorrowWithBroadcast.length > 0;
+
   return (
     <>
       <section className="max-w-5xl mx-auto px-6 py-8">
@@ -80,6 +86,20 @@ export default function GamesSection({ games }: Props) {
           <p className="text-sm text-base-content/40">Nenhum jogo com transmissão confirmada para este dia.</p>
         )}
       </section>
+
+      {showTomorrowFallback && (
+        <section className="max-w-5xl mx-auto px-6 pb-8">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-base-content">{titles.tomorrow}</h2>
+            <p className="text-xs text-base-content/40 mt-0.5">{getDateLabel("tomorrow")}</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {tomorrowWithBroadcast.map((game) => (
+              <GameCard key={game.id} game={game} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="max-w-5xl mx-auto px-6 pb-12">
         <h2 className="text-lg font-semibold text-base-content mb-4">Outros jogos do dia</h2>
