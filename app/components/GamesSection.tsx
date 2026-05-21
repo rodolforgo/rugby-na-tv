@@ -25,6 +25,21 @@ function groupByLeague(games: GameWithChannels[]): Record<string, GameWithChanne
   );
 }
 
+function getDateLabel(option: DateOption): string {
+  const date = new Date();
+  if (option === "yesterday") date.setDate(date.getDate() - 1);
+  if (option === "tomorrow") date.setDate(date.getDate() + 1);
+
+  const parts = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).formatToParts(date);
+
+  return parts.map((p) => (p.type === "month" ? p.value.charAt(0).toUpperCase() + p.value.slice(1) : p.value)).join("");
+}
+
 export default function GamesSection({ games }: Props) {
   const [selected, setSelected] = useState<DateOption>("today");
 
@@ -36,7 +51,10 @@ export default function GamesSection({ games }: Props) {
     <>
       <section className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h2 className="text-lg font-semibold text-base-content">{titles[selected]}</h2>
+          <div>
+            <h2 className="text-lg font-semibold text-base-content">{titles[selected]}</h2>
+            <p className="text-xs text-base-content/40 mt-0.5">{getDateLabel(selected)}</p>
+          </div>
           <DateSelector selected={selected} onChange={setSelected} />
         </div>
         {withBroadcast.length > 0 ? (
@@ -56,7 +74,9 @@ export default function GamesSection({ games }: Props) {
           <div className="flex flex-col gap-6">
             {Object.entries(groupedByLeague).map(([league, leagueGames]) => (
               <div key={league}>
-                <h3 className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-1 px-3">{league}</h3>
+                <h3 className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-1 px-3">
+                  {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
+                </h3>
                 <div className="border border-base-300 rounded-lg overflow-hidden">
                   {leagueGames.map((game) => (
                     <GameRow key={game.id} game={game} />
