@@ -42,6 +42,21 @@ export type GameWithChannels = {
   channels: { id: string; name: string; logo: string | null; url: string | null }[];
 };
 
+export type ChannelWithVotes = {
+  id: string;
+  name: string;
+  logo: string | null;
+  url: string | null;
+  upvoteCount: number;
+  downvoteCount: number;
+  userVote: "upvote" | "downvote" | null;
+  isCommunity: boolean;
+};
+
+export type GameWithVotes = GameWithChannels & {
+  allChannels: ChannelWithVotes[];
+};
+
 export type BroadcastCompareResult = {
   date: string;
   roninTotal: number;

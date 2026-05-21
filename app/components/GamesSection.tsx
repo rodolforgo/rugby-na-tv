@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { GameWithChannels } from "@/domain/games/games.types";
+import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import DateSelector, { type DateOption } from "./DateSelector";
 import GameCard from "./GameCard";
 import GameRow from "./GameRow";
@@ -12,16 +12,18 @@ const titles: Record<DateOption, string> = {
   tomorrow: "Jogos com transmissão amanhã",
 };
 
-type Props = { games: GameWithChannels[] };
+type Props = { games: GameWithVotes[]; isLoggedIn: boolean };
 
-function groupByLeague(games: GameWithChannels[]): Record<string, GameWithChannels[]> {
+type LocalVotes = Record<string, Record<string, { upvoteCount: number; downvoteCount: number; userVote: "upvote" | "downvote" | null }>>;
+
+function groupByLeague(games: GameWithVotes[]): Record<string, GameWithVotes[]> {
   return games.reduce(
     (acc, game) => {
       if (!acc[game.leagueName]) acc[game.leagueName] = [];
       acc[game.leagueName].push(game);
       return acc;
     },
-    {} as Record<string, GameWithChannels[]>,
+    {} as Record<string, GameWithVotes[]>,
   );
 }
 
@@ -51,18 +53,61 @@ function getDateLabel(option: DateOption): string {
   return parts.map((p) => (p.type === "month" ? p.value.charAt(0).toUpperCase() + p.value.slice(1) : p.value)).join("");
 }
 
-export default function GamesSection({ games }: Props) {
+function mergeChannels(game: GameWithVotes, localVotes: LocalVotes): ChannelWithVotes[] {
+  return game.allChannels.map((c) => {
+    const local = localVotes[game.id]?.[c.id];
+    return local ? { ...c, ...local } : c;
+  });
+}
+
+function hasBroadcast(game: GameWithVotes, localVotes: LocalVotes): boolean {
+  if (game.channels.length > 0) return true;
+  return mergeChannels(game, localVotes).some((c) => c.upvoteCount > c.downvoteCount);
+}
+
+export default function GamesSection({ games, isLoggedIn }: Props) {
   const [selected, setSelected] = useState<DateOption>("today");
+  const [localVotes, setLocalVotes] = useState<LocalVotes>({});
+
+  function clearLocalVotes(gameId: string) {
+    setLocalVotes((prev) => {
+      const next = { ...prev };
+      delete next[gameId];
+      return next;
+    });
+  }
+
+  function handleVote(gameId: string, channelId: string, voteType: "upvote" | "downvote") {
+    setLocalVotes((prev) => {
+      const current = prev[gameId]?.[channelId] ?? { upvoteCount: 0, downvoteCount: 0, userVote: null };
+      const wasVoted = current.userVote === voteType;
+      return {
+        ...prev,
+        [gameId]: {
+          ...prev[gameId],
+          [channelId]: {
+            upvoteCount: voteType === "upvote" ? current.upvoteCount + (wasVoted ? -1 : 1) : current.upvoteCount,
+            downvoteCount: voteType === "downvote" ? current.downvoteCount + (wasVoted ? -1 : 1) : current.downvoteCount,
+            userVote: wasVoted ? null : voteType,
+          },
+        },
+      };
+    });
+  }
+
+  function getGameWithLocalVotes(game: GameWithVotes): GameWithVotes {
+    return { ...game, allChannels: mergeChannels(game, localVotes) };
+  }
 
   const targetDate = getTargetDateString(selected);
   const gamesForDay = games.filter((g) => getSpDateString(new Date(g.date)) === targetDate);
-  const withBroadcast = gamesForDay.filter((g) => g.channels.length > 0);
-  const withoutBroadcast = gamesForDay.filter((g) => g.channels.length === 0);
+  const withBroadcast = gamesForDay.filter((g) => hasBroadcast(g, localVotes));
+  const withoutBroadcast = gamesForDay.filter((g) => !hasBroadcast(g, localVotes));
   const groupedByLeague = groupByLeague(withoutBroadcast);
 
   const tomorrowWithBroadcast =
     selected === "today" && withBroadcast.length === 0
-      ? games.filter((g) => getSpDateString(new Date(g.date)) === getTargetDateString("tomorrow") && g.channels.length > 0)
+      ? games.filter((g) => getSpDateString(new Date(g.date)) === getTargetDateString("tomorrow") && hasBroadcast(g, localVotes))
       : [];
   const showTomorrowFallback = tomorrowWithBroadcast.length > 0;
 
@@ -79,7 +124,13 @@ export default function GamesSection({ games }: Props) {
         {withBroadcast.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {withBroadcast.map((game) => (
-              <GameCard key={game.id} game={game} />
+              <GameCard
+                key={game.id}
+                game={getGameWithLocalVotes(game)}
+                isLoggedIn={isLoggedIn}
+                onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
+                onVoteSettled={() => clearLocalVotes(game.id)}
+              />
             ))}
           </div>
         ) : (
@@ -95,7 +146,13 @@ export default function GamesSection({ games }: Props) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {tomorrowWithBroadcast.map((game) => (
-              <GameCard key={game.id} game={game} />
+              <GameCard
+                key={game.id}
+                game={getGameWithLocalVotes(game)}
+                isLoggedIn={isLoggedIn}
+                onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
+                onVoteSettled={() => clearLocalVotes(game.id)}
+              />
             ))}
           </div>
         </section>
@@ -110,9 +167,15 @@ export default function GamesSection({ games }: Props) {
                 <h3 className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-1 px-3">
                   {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
                 </h3>
-                <div className="border border-base-300 rounded-lg overflow-hidden">
+                <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
                   {leagueGames.map((game) => (
-                    <GameRow key={game.id} game={game} />
+                    <GameRow
+                      key={game.id}
+                      game={getGameWithLocalVotes(game)}
+                      isLoggedIn={isLoggedIn}
+                      onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
+                      onVoteSettled={() => clearLocalVotes(game.id)}
+                    />
                   ))}
                 </div>
               </div>

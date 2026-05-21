@@ -71,6 +71,13 @@
       "when": 1779385105107,
       "tag": "0009_illegal_gorilla_man",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1779389513618,
+      "tag": "0010_overrated_tempest",
+      "breakpoints": true
     }
   ]
 }
