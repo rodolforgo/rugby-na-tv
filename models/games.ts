@@ -1,4 +1,13 @@
-import type { ApiGame, Broadcast, BroadcastCompareResult, GameData, GameWithChannels, RoninApiResponse } from "@/domain/games/games.types";
+import type {
+  ApiGame,
+  Broadcast,
+  BroadcastCompareResult,
+  GameData,
+  GameWithChannels,
+  GameWithVotes,
+  RoninApiResponse,
+} from "@/domain/games/games.types";
+import votes from "@/models/votes";
 import { translateTeamName, tokenMatch } from "@/domain/games/translations";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
@@ -267,8 +276,30 @@ async function getLastBroadcastLog() {
   });
 }
 
+async function listWithVotesForDisplay(userId?: string): Promise<GameWithVotes[]> {
+  const [gamesList, allChannels] = await Promise.all([listForDisplay(), db.query.channelsSchema.findMany()]);
+
+  const gameIds = gamesList.map((g) => g.id);
+  const [voteCounts, userVoteMap] = await Promise.all([
+    votes.getForGames(gameIds),
+    userId ? votes.getUserVotesForGames(userId, gameIds) : Promise.resolve({} as Record<string, Record<string, "upvote" | "downvote">>),
+  ]);
+
+  return gamesList.map((game) => ({
+    ...game,
+    allChannels: allChannels.map((channel) => ({
+      ...channel,
+      upvoteCount: voteCounts[game.id]?.[channel.id]?.upvoteCount ?? 0,
+      downvoteCount: voteCounts[game.id]?.[channel.id]?.downvoteCount ?? 0,
+      userVote: (userVoteMap[game.id]?.[channel.id] ?? null) as "upvote" | "downvote" | null,
+      isCommunity: !game.channels.some((c) => c.id === channel.id),
+    })),
+  }));
+}
+
 const games = {
   listForDisplay,
+  listWithVotesForDisplay,
   fetchByDate,
   saveGames,
   createGame,

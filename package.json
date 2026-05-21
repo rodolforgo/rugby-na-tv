@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm run docker:up && next dev --turbopack",
+    "dev": "npm run docker:up && npm run db:migrate && npm run db:seed && npm run db:seed:channels && next dev --turbopack",
     "build": "next build --turbopack",
     "vercel-build": "npm run db:migrate && npm run db:seed && next build --turbopack",
     "start": "next start",

@@ -158,10 +158,11 @@ const gamesSeed = [
 ];
 
 const channelsSeed = [
-  { name: "ESPN Brasil", logo: null, url: "https://www.espn.com.br" },
-  { name: "Star+", logo: null, url: "https://www.starplus.com" },
   { name: "Disney+ Brasil", logo: null, url: "https://www.disneyplus.com" },
-  { name: "Canal W", logo: null, url: null },
+  { name: "ESPN", logo: null, url: "https://www.espn.com.br" },
+  { name: "YouTube", logo: null, url: "https://www.youtube.com" },
+  { name: "RugbyPass", logo: null, url: "https://www.rugbypass.com" },
+  { name: "TV5Monde", logo: null, url: "https://www.tv5monde.com" },
 ];
 
 async function seedChannels() {
