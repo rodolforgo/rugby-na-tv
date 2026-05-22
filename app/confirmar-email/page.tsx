@@ -18,7 +18,7 @@ export default async function ConfirmarEmailPage({ searchParams }: Props) {
             <div className="text-4xl">✓</div>
             <h1 className="text-xl font-bold text-success">E-mail confirmado!</h1>
             <p className="text-sm text-base-content/60">Sua conta está ativa. Você já pode fazer login.</p>
-            <a href="/login" className="btn btn-primary w-full">
+            <a href="/?modal=login" className="btn btn-primary w-full">
               Fazer login
             </a>
           </div>
@@ -41,7 +41,7 @@ function Result({ error }: { error: string }) {
             <span>{error}</span>
           </div>
           <p className="text-sm text-base-content/60">Solicite um novo link de verificação.</p>
-          <a href="/register" className="btn btn-ghost btn-sm">
+          <a href="/?modal=register" className="btn btn-ghost btn-sm">
             Voltar ao cadastro
           </a>
         </div>
