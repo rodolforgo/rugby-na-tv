@@ -250,10 +250,12 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
       matched++;
 
       const roninDate = new Date(`${broadcast.date}-03:00`);
-      await db
-        .update(gamesSchema)
-        .set({ date: roninDate, timestamp: Math.floor(roninDate.getTime() / 1000) })
-        .where(eq(gamesSchema.id, game.id));
+      if (!Number.isNaN(roninDate.getTime())) {
+        await db
+          .update(gamesSchema)
+          .set({ date: roninDate, timestamp: Math.floor(roninDate.getTime() / 1000) })
+          .where(eq(gamesSchema.id, game.id));
+      }
 
       for (const channel of broadcast.channels) {
         const channelId = await findOrCreateChannel(channel.name);
