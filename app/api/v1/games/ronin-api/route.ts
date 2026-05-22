@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { methodNotAllowedResponse, UnauthorizedError, ValidationError } from "@/infra/errors";
 import controller from "@/infra/controller";
 import games from "@/models/games";
@@ -20,6 +21,11 @@ export const GET = controller.errorHandler(async (req) => {
   }
 
   const result = await games.compareBroadcasts(date);
+
+  if (result.matched > 0) {
+    revalidatePath("/api/v1/games");
+    revalidatePath("/");
+  }
 
   return NextResponse.json(result);
 });

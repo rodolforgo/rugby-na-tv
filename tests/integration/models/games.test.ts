@@ -202,6 +202,27 @@ describe("games.compareBroadcasts()", () => {
     expect(gameChannel).toBeDefined();
   });
 
+  test("Sobrescreve o horário do jogo com o horário da Ronin ao encontrar correspondência", async () => {
+    const originalDate = new Date("2026-05-15T15:00:00Z");
+    const game = await createTestGame({
+      homeTeamName: "Northampton Saints",
+      awayTeamName: "Bristol",
+      date: originalDate,
+    });
+
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsFixture,
+    } as Response);
+
+    await games.compareBroadcasts("2026-05-15");
+
+    const updated = await games.findById(game.id);
+    const expectedDate = new Date("2026-05-15T21:45:00Z"); // 18:45 Brasília = 21:45 UTC
+
+    expect(updated?.date).toEqual(expectedDate);
+    expect(updated?.timestamp).toBe(Math.floor(expectedDate.getTime() / 1000));
+  });
+
   test("Encontra correspondência quando nomes dos times estão em português e liga está reordenada", async () => {
     await createTestGame({
       homeTeamName: "Wales W",
