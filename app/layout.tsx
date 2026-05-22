@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import AuthModals from "./components/AuthModals";
 
 export const metadata: Metadata = {
   title: "Rugby na TV",
@@ -20,6 +22,9 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Suspense>
+          <AuthModals />
+        </Suspense>
       </body>
     </html>
   );

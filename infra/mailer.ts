@@ -14,7 +14,7 @@ const BASE_URL = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${pro
 async function sendVerificationEmail(to: string, token: string) {
   if (!process.env.SMTP_HOST) return;
 
-  const verificationUrl = `${BASE_URL}/api/v1/users/verify-email?token=${token}`;
+  const verificationUrl = `${BASE_URL}/confirmar-email?token=${token}`;
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
