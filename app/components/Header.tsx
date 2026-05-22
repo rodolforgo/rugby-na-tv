@@ -23,10 +23,6 @@ export default async function Header() {
           <span className="text-sm font-semibold tracking-wide">Rugby na TV</span>
         </a>
 
-        <span className="absolute left-1/2 -translate-x-1/2 text-xs text-base-content/50 hidden sm:block">
-          Plataforma colaborativa de divulgação de transmissões.
-        </span>
-
         {session ? (
           <form action={logout}>
             <button type="submit" className="btn btn-ghost btn-sm">
