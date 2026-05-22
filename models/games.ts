@@ -249,7 +249,7 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
     if (game) {
       matched++;
 
-      const roninDate = new Date(`${broadcast.date}-03:00`);
+      const roninDate = new Date(broadcast.date);
       if (!Number.isNaN(roninDate.getTime())) {
         await db
           .update(gamesSchema)
