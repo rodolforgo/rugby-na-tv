@@ -36,7 +36,7 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
 
   function vote(channelId: string, voteType: "upvote" | "downvote") {
     if (!isLoggedIn) {
-      router.push("/login");
+      router.push("/?modal=login");
       return;
     }
 
@@ -49,7 +49,7 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
         body: JSON.stringify({ channelId, voteType }),
       });
       if (res.status === 401) {
-        router.push("/login");
+        router.push("/?modal=login");
         return;
       }
       onVoteSettled();
@@ -59,7 +59,7 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
 
   function openModal() {
     if (!isLoggedIn) {
-      router.push("/login");
+      router.push("/?modal=login");
       return;
     }
     setSelectedChannelId(game.allChannels[0]?.id ?? "");
