@@ -15,7 +15,7 @@ import { channelsSchema } from "@/infra/database/schema/channels";
 import { gameChannelsSchema } from "@/infra/database/schema/gameChannels";
 import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
 import { broadcastLogsSchema } from "@/infra/database/schema/broadcastLogs";
-import { and, gte, lt, desc } from "drizzle-orm";
+import { and, eq, gte, lt, desc } from "drizzle-orm";
 
 const RUGBY_API_BASE_URL = "https://v1.rugby.api-sports.io";
 
@@ -248,6 +248,13 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
 
     if (game) {
       matched++;
+
+      const roninDate = new Date(`${broadcast.date}-03:00`);
+      await db
+        .update(gamesSchema)
+        .set({ date: roninDate, timestamp: Math.floor(roninDate.getTime() / 1000) })
+        .where(eq(gamesSchema.id, game.id));
+
       for (const channel of broadcast.channels) {
         const channelId = await findOrCreateChannel(channel.name);
         await db.insert(gameChannelsSchema).values({ gameId: game.id, channelId }).onConflictDoNothing();
