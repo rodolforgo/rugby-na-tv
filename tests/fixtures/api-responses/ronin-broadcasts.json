@@ -10,7 +10,7 @@
                   "fixtures": [
                     {
                       "fixture_id": 12345,
-                      "date": "2026-05-15T18:45:00",
+                      "date": "2026-05-15T21:45:00.000Z",
                       "home_team": "Northampton Saints",
                       "visiting_team": "Bristol",
                       "league": "Premiership Rugby",
