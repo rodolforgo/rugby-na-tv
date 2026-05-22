@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
+import { formatTime } from "@/app/lib/format";
 import TeamLogo from "./TeamLogo";
+import SuggestChannelModal from "./SuggestChannelModal";
+import { useGameVoting } from "./useGameVoting";
 
 type Props = {
   game: GameWithVotes;
@@ -12,65 +13,20 @@ type Props = {
   onVoteSettled: () => void;
 };
 
-function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    timeZone: "America/Sao_Paulo",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
 export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Props) {
-  const router = useRouter();
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [selectedChannelId, setSelectedChannelId] = useState(game.allChannels[0]?.id ?? "");
-  const [isPending, startTransition] = useTransition();
+  const { vote, openModal, handleConfirm, isPending, dialogRef, selectedChannelId, setSelectedChannelId } = useGameVoting({
+    game,
+    isLoggedIn,
+    onVote,
+    onVoteSettled,
+  });
 
   const hasScore = game.scoresHome !== null && game.scoresAway !== null;
   const isFromRonin = game.channels.length > 0;
   const officialChannels = game.channels;
   const communityChannels = game.allChannels.filter((c) => c.isCommunity && c.upvoteCount > 0);
   const visibleChannels = [...officialChannels, ...communityChannels];
-
   const availableForSuggestion = game.allChannels.filter((c) => !visibleChannels.some((v) => v.id === c.id));
-
-  function vote(channelId: string, voteType: "upvote" | "downvote") {
-    if (!isLoggedIn) {
-      router.push("/?modal=login");
-      return;
-    }
-
-    onVote(channelId, voteType);
-
-    startTransition(async () => {
-      const res = await fetch(`/api/v1/games/${game.id}/votes`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ channelId, voteType }),
-      });
-      if (res.status === 401) {
-        router.push("/?modal=login");
-        return;
-      }
-      onVoteSettled();
-      router.refresh();
-    });
-  }
-
-  function openModal() {
-    if (!isLoggedIn) {
-      router.push("/?modal=login");
-      return;
-    }
-    setSelectedChannelId(game.allChannels[0]?.id ?? "");
-    dialogRef.current?.showModal();
-  }
-
-  function handleConfirm() {
-    if (!selectedChannelId) return;
-    dialogRef.current?.close();
-    vote(selectedChannelId, "upvote");
-  }
 
   return (
     <>
@@ -117,7 +73,12 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
                 <ChannelVoteBadge key={channel.id} channel={channel} onVote={vote} variant="success" isPending={isPending} />
               ))}
             {!isFromRonin && availableForSuggestion.length > 0 && (
-              <button type="button" onClick={openModal} className="text-xs text-primary/60 hover:text-primary transition-colors px-1">
+              <button
+                type="button"
+                onClick={openModal}
+                disabled={isPending}
+                className="text-xs text-primary/60 hover:text-primary transition-colors px-1"
+              >
                 + Indicar
               </button>
             )}
@@ -125,40 +86,15 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
         </div>
       </div>
 
-      <dialog ref={dialogRef} className="modal">
-        <div className="modal-box max-w-sm">
-          <h3 className="font-semibold text-base mb-1">Indicar transmissão</h3>
-          <p className="text-xs text-base-content/50 mb-4">
-            {game.homeTeamName} × {game.awayTeamName}
-          </p>
-
-          <select
-            className="select select-bordered w-full text-sm"
-            value={selectedChannelId}
-            onChange={(e) => setSelectedChannelId(e.target.value)}
-          >
-            {game.allChannels.map((channel) => (
-              <option key={channel.id} value={channel.id}>
-                {channel.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="modal-action mt-4">
-            <form method="dialog">
-              <button type="submit" className="btn btn-ghost btn-sm mr-2">
-                Cancelar
-              </button>
-            </form>
-            <button type="button" className="btn btn-primary btn-sm" disabled={!selectedChannelId} onClick={handleConfirm}>
-              Confirmar
-            </button>
-          </div>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button type="submit">fechar</button>
-        </form>
-      </dialog>
+      <SuggestChannelModal
+        homeTeamName={game.homeTeamName}
+        awayTeamName={game.awayTeamName}
+        channels={game.allChannels}
+        selectedChannelId={selectedChannelId}
+        onSelectChannel={setSelectedChannelId}
+        onConfirm={handleConfirm}
+        dialogRef={dialogRef}
+      />
     </>
   );
 }
