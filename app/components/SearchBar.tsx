@@ -2,7 +2,7 @@
 
 import { useFilter } from "@/app/context/FilterContext";
 
-export default function SearchBar() {
+export default function SearchBar({ className }: { className?: string }) {
   const { query, setQuery } = useFilter();
   return (
     <input
@@ -10,7 +10,7 @@ export default function SearchBar() {
       placeholder="Filtrar por time ou liga..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
-      className="input input-sm input-bordered w-full max-w-xs"
+      className={`input input-sm input-bordered ${className ?? "w-full max-w-sm"}`}
     />
   );
 }
