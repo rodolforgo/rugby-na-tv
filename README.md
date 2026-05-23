@@ -1,13 +1,14 @@
 # Rugby na TV
 
-Plataforma para centralizar e divulgar transmissões de rugby no Brasil, organizando jogos por data, campeonato e plataforma de streaming.
+Plataforma colaborativa e open-source para centralizar transmissões de rugby no Brasil. Os jogos são sincronizados automaticamente com fontes externas e a comunidade pode indicar e confirmar onde cada partida será transmitida — seja em canais de TV aberta, fechada ou serviços de streaming.
 
 ## Tecnologias
 
-- **Next.js 16** — App Router, Server Components
-- **PostgreSQL 16** com **Drizzle ORM**
-- **NextAuth v4** — autenticação por sessão com banco de dados
+- **Next.js 16** — App Router, Server Components e Server Actions
+- **PostgreSQL 16** com **Drizzle ORM** — banco relacional e migrations
+- **Tailwind CSS** + **DaisyUI** — estilização e componentes
 - **Nodemailer** — envio de e-mails transacionais via SMTP
+- **Zod** — validação de schemas
 - **Jest** — testes de integração
 - **Biome** — lint e formatação
 
@@ -16,45 +17,79 @@ Plataforma para centralizar e divulgar transmissões de rugby no Brasil, organiz
 ### Status
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| GET | `/api/v1/status` | Health check: versão do banco, conexões e status do mailer |
+| GET | `/api/v1/status` | Health check: versão do banco e conexões ativas |
 
 ### Usuários
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| POST | `/api/v1/users` | Cadastro de usuário |
-| GET | `/api/v1/users` | Lista todos os usuários |
-| GET | `/api/v1/users/verify-email?token=` | Verifica e-mail via token |
-| POST | `/api/v1/users/verify-email/resend` | Reenvio do e-mail de verificação |
+| POST | `/api/v1/users` | Cadastro de novo usuário |
+| GET | `/api/v1/users/verify-email?token=` | Confirmação de e-mail via token |
+| POST | `/api/v1/users/verify-email/resend` | Reenvio do e-mail de confirmação |
 
 ### Sessões
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | POST | `/api/v1/sessions` | Login — cria sessão e define cookie HTTP-only |
 
-## Fluxos principais
-
-### Cadastro
-1. `POST /api/v1/users` com `{ email, password }`
-2. Usuário criado, token de verificação gerado e e-mail enviado
-3. Usuário clica no link → `GET /api/v1/users/verify-email?token=`
-4. E-mail confirmado, acesso liberado para login
-
-> Caso o e-mail não chegue: `POST /api/v1/users/verify-email/resend` com `{ email }`.
-> Há cooldown de 1 minuto entre reenvios.
-
-### Login
-1. `POST /api/v1/sessions` com `{ email, password }`
-2. Credenciais validadas — e-mail **deve** estar verificado
-3. Cookie `session_token` definido com expiração de 7 dias
+### Jogos
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| GET | `/api/v1/games` | Lista jogos com canais e votos |
+| POST | `/api/v1/games/api-sports` | Sincroniza jogos da API Sports (requer `SYNC_SECRET`) |
+| GET | `/api/v1/games/ronin-api` | Sincroniza transmissões da Ronin Media API (requer `SYNC_SECRET`) |
+| POST | `/api/v1/games/:id/votes` | Registra ou atualiza voto em um canal |
+| DELETE | `/api/v1/games/:id/votes` | Remove voto |
 
 ## Desenvolvimento
 
+### Pré-requisitos
+
+- Node 24.11.1 (recomendado via [nvm](https://github.com/nvm-sh/nvm))
+- Docker (para o PostgreSQL local)
+
+### Configuração
+
 ```bash
-npm run dev          # inicia Next.js + banco Docker
-npm test             # roda suíte de integração completa
-npm run lint         # checa código com Biome
-npm run db:migrate   # aplica migrations pendentes
-npm run db:studio    # abre Drizzle Studio
+git clone https://github.com/rodolforgo/rugby-na-tv.git
+cd rugby-na-tv
+nvm use          # ou: node >= 24
+npm install
 ```
 
-Requer Node 24.11.1 e Docker. Copie `.env.development` e preencha as variáveis locais conforme necessário.
+Copie o arquivo de variáveis e preencha os valores necessários:
+
+```bash
+cp .env.development .env.development.local
+# edite .env.development.local com suas credenciais
+```
+
+### Rodando localmente
+
+```bash
+npm run dev        # inicia Next.js + sobe o banco via Docker
+npm run db:migrate # aplica migrations pendentes
+npm run db:studio  # abre o Drizzle Studio em localhost:3000
+```
+
+### Testes
+
+```bash
+npm test           # suíte completa de integração (inicia Docker automaticamente)
+npm run test:watch # modo watch — requer servidor e banco já rodando
+```
+
+### Qualidade de código
+
+```bash
+npm run lint       # checa com Biome
+npm run format     # formata com Biome
+```
+
+## Como contribuir
+
+1. Faça um fork do repositório
+2. Crie uma branch a partir da `main`: `git checkout -b feature/sua-feature`
+3. Implemente seguindo os padrões do projeto (Biome para lint, testes de integração para novas funcionalidades)
+4. Abra um Pull Request descrevendo o que foi feito
+
+Issues abertas com sugestões e bugs estão disponíveis na aba [Issues](https://github.com/rodolforgo/rugby-na-tv/issues). Contribuições de qualquer natureza são bem-vindas.
