@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AuthModals from "./components/AuthModals";
+import { FilterProvider } from "./context/FilterContext";
 
 export const metadata: Metadata = {
   title: "Rugby na TV",
@@ -19,12 +20,14 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className="antialiased flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <Suspense>
-          <AuthModals />
-        </Suspense>
+        <FilterProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <Suspense>
+            <AuthModals />
+          </Suspense>
+        </FilterProvider>
       </body>
     </html>
   );

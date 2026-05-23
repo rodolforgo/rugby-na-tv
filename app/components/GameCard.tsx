@@ -119,7 +119,8 @@ function ChannelVoteBadge({ channel, onVote, variant, isPending }: ChannelVoteBa
         type="button"
         disabled={isPending}
         onClick={() => onVote(channel.id, "upvote")}
-        className={`px-1.5 py-0.5 transition-colors ${upColor}`}
+        title="Confirmo"
+        className={`px-1.5 py-0.5 transition-colors cursor-pointer ${upColor}`}
       >
         ▲{channel.upvoteCount > 0 ? ` ${channel.upvoteCount}` : ""}
       </button>
@@ -127,7 +128,8 @@ function ChannelVoteBadge({ channel, onVote, variant, isPending }: ChannelVoteBa
         type="button"
         disabled={isPending}
         onClick={() => onVote(channel.id, "downvote")}
-        className={`px-1.5 py-0.5 transition-colors ${downColor} mr-0.5`}
+        title="Não confirmo"
+        className={`px-1.5 py-0.5 transition-colors cursor-pointer ${downColor} mr-0.5`}
       >
         ▼{channel.downvoteCount > 0 ? ` ${channel.downvoteCount}` : ""}
       </button>
