@@ -1,6 +1,6 @@
 # Rugby na TV
 
-Plataforma colaborativa e open-source para centralizar transmissões de rugby no Brasil. Os jogos são sincronizados automaticamente com fontes externas e a comunidade pode indicar e confirmar onde cada partida será transmitida — seja em canais de TV aberta, fechada ou serviços de streaming.
+Plataforma colaborativa e open-source para centralizar transmissões de rugby no Brasil. Os jogos são sincronizados automaticamente com fontes externas e a comunidade pode indicar e confirmar onde cada partida será transmitida, seja em canais de TV aberta, fechada ou serviços de streaming.
 
 ## Tecnologias
 
