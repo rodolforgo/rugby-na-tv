@@ -92,7 +92,8 @@ function ChannelPill({ channel, onVote, isPending }: ChannelPillProps) {
         type="button"
         disabled={isPending}
         onClick={() => onVote(channel.id, "upvote")}
-        className={`flex items-center gap-0.5 px-2 py-1 font-medium transition-colors border-r border-base-300 ${
+        title="Confirmo"
+        className={`flex items-center gap-0.5 px-2 py-1 font-medium transition-colors border-r border-base-300 cursor-pointer ${
           channel.userVote === "upvote"
             ? "bg-success/20 text-success"
             : "bg-base-100 text-base-content/60 hover:bg-success/10 hover:text-success"
@@ -104,7 +105,8 @@ function ChannelPill({ channel, onVote, isPending }: ChannelPillProps) {
         type="button"
         disabled={isPending}
         onClick={() => onVote(channel.id, "downvote")}
-        className={`flex items-center gap-0.5 px-2 py-1 font-medium transition-colors ${
+        title="Não confirmo"
+        className={`flex items-center gap-0.5 px-2 py-1 font-medium transition-colors cursor-pointer ${
           channel.userVote === "downvote" ? "bg-error/20 text-error" : "bg-base-100 text-base-content/60 hover:bg-error/10 hover:text-error"
         }`}
       >

@@ -5,6 +5,7 @@ import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types
 import DateSelector, { type DateOption } from "./DateSelector";
 import GameCard from "./GameCard";
 import GameRow from "./GameRow";
+import { useFilter } from "@/app/context/FilterContext";
 
 const titles: Record<DateOption, string> = {
   yesterday: "Jogos com transmissão ontem",
@@ -65,9 +66,18 @@ function hasBroadcast(game: GameWithVotes, localVotes: LocalVotes): boolean {
   return mergeChannels(game, localVotes).some((c) => c.upvoteCount > c.downvoteCount);
 }
 
+function matchesQuery(game: GameWithVotes, query: string): boolean {
+  if (!query.trim()) return true;
+  const q = query.toLowerCase();
+  return (
+    game.homeTeamName.toLowerCase().includes(q) || game.awayTeamName.toLowerCase().includes(q) || game.leagueName.toLowerCase().includes(q)
+  );
+}
+
 export default function GamesSection({ games, isLoggedIn }: Props) {
   const [selected, setSelected] = useState<DateOption>("today");
   const [localVotes, setLocalVotes] = useState<LocalVotes>({});
+  const { query } = useFilter();
 
   function clearLocalVotes(gameId: string) {
     setLocalVotes((prev) => {
@@ -100,7 +110,7 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
   }
 
   const targetDate = getTargetDateString(selected);
-  const gamesForDay = games.filter((g) => getSpDateString(new Date(g.date)) === targetDate);
+  const gamesForDay = games.filter((g) => getSpDateString(new Date(g.date)) === targetDate && matchesQuery(g, query));
   const withBroadcast = gamesForDay.filter((g) => hasBroadcast(g, localVotes));
   const withoutBroadcast = gamesForDay.filter((g) => !hasBroadcast(g, localVotes));
   const groupedByLeague = groupByLeague(withoutBroadcast);
@@ -134,7 +144,11 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-base-content/40">Nenhum jogo com transmissão confirmada para este dia.</p>
+          <p className="text-sm text-base-content/40">
+            {query.trim()
+              ? `Nenhum jogo com transmissão corresponde a "${query}".`
+              : "Nenhum jogo com transmissão confirmada para este dia."}
+          </p>
         )}
       </section>
 
@@ -182,7 +196,9 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-base-content/40">Nenhum outro jogo registrado para este dia.</p>
+          <p className="text-sm text-base-content/40">
+            {query.trim() ? `Nenhum outro jogo corresponde a "${query}".` : "Nenhum outro jogo registrado para este dia."}
+          </p>
         )}
       </section>
     </>
