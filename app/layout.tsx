@@ -4,7 +4,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AuthModals from "./components/AuthModals";
-import { FilterProvider } from "./context/FilterContext";
+import { FilterProvider } from "./shared/context/FilterContext";
 
 export const metadata: Metadata = {
   title: "Rugby na TV",
