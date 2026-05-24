@@ -1,0 +1,1 @@
+ALTER TABLE "game_channels" ADD COLUMN "voteable" boolean DEFAULT true NOT NULL;

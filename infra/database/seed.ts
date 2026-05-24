@@ -4,7 +4,7 @@ import { gamesSchema } from "@/infra/database/schema/games";
 import { channelsSchema } from "@/infra/database/schema/channels";
 import { gameChannelsSchema } from "@/infra/database/schema/gameChannels";
 
-const knownFeatures = ["read:activation_token", "vote:games"];
+const knownFeatures = ["read:activation_token", "vote:games", "create:user_game", "delete:any_user_game"];
 
 async function seedFeatures() {
   for (const name of knownFeatures) {

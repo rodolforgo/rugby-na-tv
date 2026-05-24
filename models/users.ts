@@ -33,6 +33,20 @@ async function getUserByEmail(email: string) {
   return user;
 }
 
+async function getUserById(id: string) {
+  const user = await db.query.usersSchema.findFirst({
+    where: eq(usersSchema.id, id),
+  });
+
+  if (!user) {
+    throw new ValidationError("Usuário não encontrado.", {
+      action: "Verifique os dados informados e tente novamente.",
+    });
+  }
+
+  return user;
+}
+
 async function getAllUsers() {
   return await db.query.usersSchema.findMany();
 }
@@ -114,6 +128,7 @@ const users = {
   validateUniqueEmail,
   createNewUser,
   getAllUsers,
+  getUserById,
   getUserByEmail,
   addFeatureToUser,
   removeFeatureFromUser,

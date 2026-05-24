@@ -1,4 +1,4 @@
-import { pgTable, uuid, unique } from "drizzle-orm/pg-core";
+import { pgTable, uuid, unique, boolean } from "drizzle-orm/pg-core";
 import { gamesSchema } from "./games";
 import { channelsSchema } from "./channels";
 
@@ -12,6 +12,7 @@ export const gameChannelsSchema = pgTable(
     channelId: uuid()
       .notNull()
       .references(() => channelsSchema.id, { onDelete: "cascade" }),
+    voteable: boolean().notNull().default(true),
   },
   (t) => [unique().on(t.gameId, t.channelId)],
 );
