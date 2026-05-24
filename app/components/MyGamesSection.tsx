@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GameWithChannels } from "@/domain/games/games.types";
-import { formatTime } from "@/app/lib/format";
+import { formatTime } from "@/app/shared/lib/format";
 import ConfirmModal from "./ConfirmModal";
 
 type Props = { games: GameWithChannels[] };

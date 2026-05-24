@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/infra/database";
 import { sessionSchema } from "@/infra/database/schema/sessions";
-import { logout } from "@/app/actions/auth";
+import { logout } from "@/app/shared/actions/auth";
 import SearchBar from "./SearchBar";
 
 async function getSession() {

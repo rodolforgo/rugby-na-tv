@@ -6,7 +6,7 @@ import DateSelector, { type DateOption } from "./DateSelector";
 import GameCard from "./GameCard";
 import GameRow from "./GameRow";
 import CreateGameModal from "./CreateGameModal";
-import { useFilter } from "@/app/context/FilterContext";
+import { useFilter } from "@/app/shared/context/FilterContext";
 
 const titles: Record<DateOption, string> = {
   yesterday: "Jogos com transmissão ontem",

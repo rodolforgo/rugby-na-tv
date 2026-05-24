@@ -1,6 +1,6 @@
 "use client";
 
-import { useFilter } from "@/app/context/FilterContext";
+import { useFilter } from "@/app/shared/context/FilterContext";
 
 export default function SearchBar({ className }: { className?: string }) {
   const { query, setQuery } = useFilter();

@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
-import { formatTime } from "@/app/lib/format";
+import { formatTime } from "@/app/shared/lib/format";
 import TeamLogo from "./TeamLogo";
 import SuggestChannelModal from "./SuggestChannelModal";
 import ConfirmModal from "./ConfirmModal";
 import { useGameVoting } from "./useGameVoting";
-import { TrashIcon } from "@/app/lib/icons";
+import { TrashIcon } from "@/app/shared/lib/icons";
 
 type Props = {
   game: GameWithVotes;
