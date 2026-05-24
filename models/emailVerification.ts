@@ -45,6 +45,7 @@ async function verifyEmailToken(token: string) {
 
   await users.removeFeatureFromUser(updatedUser.id, "read:activation_token");
   await users.addFeatureToUser(updatedUser.id, "vote:games");
+  await users.addFeatureToUser(updatedUser.id, "create:user_game");
 }
 
 async function resendVerificationToken(email: string): Promise<string> {

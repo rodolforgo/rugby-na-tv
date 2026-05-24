@@ -1,4 +1,5 @@
 import { pgTable, integer, varchar, timestamp, uuid } from "drizzle-orm/pg-core";
+import { usersSchema } from "@/infra/database/schema/users";
 
 export const gamesSchema = pgTable("games", {
   id: uuid().defaultRandom().primaryKey(),
@@ -15,6 +16,7 @@ export const gamesSchema = pgTable("games", {
   awayTeamLogo: varchar({ length: 500 }),
   scoresHome: integer(),
   scoresAway: integer(),
+  createdByUserId: uuid().references(() => usersSchema.id, { onDelete: "set null" }),
   created_at: timestamp({ withTimezone: true }).defaultNow().notNull(),
   updated_at: timestamp({ withTimezone: true })
     .defaultNow()

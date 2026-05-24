@@ -7,7 +7,9 @@ import type {
   GameWithVotes,
   RoninApiResponse,
 } from "@/domain/games/games.types";
+import type { CreateUserGameData } from "@/domain/games/games.schema";
 import votes from "@/models/votes";
+import users from "@/models/users";
 import { translateTeamName, tokenMatch } from "@/domain/games/translations";
 import { db } from "@/infra/database";
 import { gamesSchema } from "@/infra/database/schema/games";
@@ -16,6 +18,7 @@ import { gameChannelsSchema } from "@/infra/database/schema/gameChannels";
 import { syncLogsSchema } from "@/infra/database/schema/syncLogs";
 import { broadcastLogsSchema } from "@/infra/database/schema/broadcastLogs";
 import { and, eq, gte, lt, desc } from "drizzle-orm";
+import { ValidationError, UnauthorizedError } from "@/infra/errors";
 
 const RUGBY_API_BASE_URL = "https://v1.rugby.api-sports.io";
 
@@ -130,11 +133,13 @@ async function listForDisplay(): Promise<GameWithChannels[]> {
     awayTeamLogo: game.awayTeamLogo,
     scoresHome: game.scoresHome,
     scoresAway: game.scoresAway,
+    createdByUserId: game.createdByUserId ?? null,
     channels: game.gameChannels.map((gc) => ({
       id: gc.channel.id,
       name: gc.channel.name,
       logo: gc.channel.logo,
       url: gc.channel.url,
+      voteable: gc.voteable,
     })),
   }));
 }
@@ -143,6 +148,16 @@ async function findById(id: string) {
   return await db.query.gamesSchema.findFirst({
     where: (games, { eq }) => eq(games.id, id),
   });
+}
+
+async function getGameById(id: string) {
+  const game = await findById(id);
+
+  if (!game) {
+    throw new ValidationError("Jogo não encontrado.", { action: "Verifique o id informado." });
+  }
+
+  return game;
 }
 
 async function findByApiId(apiId: number) {
@@ -279,6 +294,90 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
   return result;
 }
 
+async function createUserGame(userId: string, data: CreateUserGameData) {
+  await users.getUserById(userId);
+
+  const date = new Date(`${data.date}T${data.time}:00-03:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    throw new ValidationError("Data ou hora inválida.", { action: "Use o formato YYYY-MM-DD para data e HH:MM para hora." });
+  }
+
+  const brDateStr = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+  const todayBRT = new Date(`${brDateStr}T00:00:00-03:00`);
+  if (date < todayBRT) {
+    throw new ValidationError("Não é possível adicionar jogos com data anterior à atual.", {
+      action: "Informe uma data de hoje ou futura.",
+    });
+  }
+
+  const [game] = await db
+    .insert(gamesSchema)
+    .values({
+      date,
+      timestamp: Math.floor(date.getTime() / 1000),
+      homeTeamName: data.homeTeamName,
+      awayTeamName: data.awayTeamName,
+      leagueName: data.leagueName,
+      countryName: "",
+      createdByUserId: userId,
+    })
+    .returning();
+
+  const channelId = await findOrCreateChannel(data.channelName);
+  await db.insert(gameChannelsSchema).values({ gameId: game.id, channelId, voteable: false }).onConflictDoNothing();
+
+  return game;
+}
+
+async function deleteUserGame(userId: string, gameId: string) {
+  const game = await getGameById(gameId);
+
+  if (!game.createdByUserId) {
+    throw new UnauthorizedError("Não é possível deletar jogos sincronizados pela plataforma.");
+  }
+
+  const isCreator = game.createdByUserId === userId;
+  const isAdmin = await users.hasFeature(userId, "delete:any_user_game");
+
+  if (!isCreator && !isAdmin) {
+    throw new UnauthorizedError("Você não tem permissão para deletar este jogo.");
+  }
+
+  await db.delete(gamesSchema).where(eq(gamesSchema.id, gameId));
+}
+
+async function listByUser(userId: string): Promise<GameWithChannels[]> {
+  const rows = await db.query.gamesSchema.findMany({
+    where: (g, { eq }) => eq(g.createdByUserId, userId),
+    orderBy: (g, { desc }) => [desc(g.date)],
+    with: { gameChannels: { with: { channel: true } } },
+  });
+
+  return rows.map((game) => ({
+    id: game.id,
+    date: game.date,
+    leagueName: game.leagueName,
+    leagueLogo: game.leagueLogo,
+    countryName: game.countryName,
+    countryFlag: game.countryFlag,
+    homeTeamName: game.homeTeamName,
+    homeTeamLogo: game.homeTeamLogo,
+    awayTeamName: game.awayTeamName,
+    awayTeamLogo: game.awayTeamLogo,
+    scoresHome: game.scoresHome,
+    scoresAway: game.scoresAway,
+    createdByUserId: game.createdByUserId ?? null,
+    channels: game.gameChannels.map((gc) => ({
+      id: gc.channel.id,
+      name: gc.channel.name,
+      logo: gc.channel.logo,
+      url: gc.channel.url,
+      voteable: gc.voteable,
+    })),
+  }));
+}
+
 async function getLastBroadcastLog() {
   return await db.query.broadcastLogsSchema.findFirst({
     orderBy: [desc(broadcastLogsSchema.created_at)],
@@ -294,16 +393,21 @@ async function listWithVotesForDisplay(userId?: string): Promise<GameWithVotes[]
     userId ? votes.getUserVotesForGames(userId, gameIds) : Promise.resolve({} as Record<string, Record<string, "upvote" | "downvote">>),
   ]);
 
-  return gamesList.map((game) => ({
-    ...game,
-    allChannels: allChannels.map((channel) => ({
-      ...channel,
-      upvoteCount: voteCounts[game.id]?.[channel.id]?.upvoteCount ?? 0,
-      downvoteCount: voteCounts[game.id]?.[channel.id]?.downvoteCount ?? 0,
-      userVote: (userVoteMap[game.id]?.[channel.id] ?? null) as "upvote" | "downvote" | null,
-      isCommunity: !game.channels.some((c) => c.id === channel.id),
-    })),
-  }));
+  return gamesList.map((game) => {
+    const nonVoteableIds = new Set(game.channels.filter((c) => !c.voteable).map((c) => c.id));
+    return {
+      ...game,
+      allChannels: allChannels
+        .filter((channel) => !nonVoteableIds.has(channel.id))
+        .map((channel) => ({
+          ...channel,
+          upvoteCount: voteCounts[game.id]?.[channel.id]?.upvoteCount ?? 0,
+          downvoteCount: voteCounts[game.id]?.[channel.id]?.downvoteCount ?? 0,
+          userVote: (userVoteMap[game.id]?.[channel.id] ?? null) as "upvote" | "downvote" | null,
+          isCommunity: !game.channels.some((c) => c.id === channel.id),
+        })),
+    };
+  });
 }
 
 const games = {
@@ -313,6 +417,7 @@ const games = {
   saveGames,
   createGame,
   findById,
+  getGameById,
   findByApiId,
   findGamesByDate,
   syncByDate,
@@ -320,6 +425,9 @@ const games = {
   fetchBroadcastsByDate,
   compareBroadcasts,
   getLastBroadcastLog,
+  createUserGame,
+  deleteUserGame,
+  listByUser,
 };
 
 export default games;

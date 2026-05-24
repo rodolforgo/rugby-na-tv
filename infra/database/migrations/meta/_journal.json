@@ -78,6 +78,20 @@
       "when": 1779389513618,
       "tag": "0010_overrated_tempest",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1779578984186,
+      "tag": "0011_wise_layla_miller",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1779580359989,
+      "tag": "0012_sparkling_jackpot",
+      "breakpoints": true
     }
   ]
 }

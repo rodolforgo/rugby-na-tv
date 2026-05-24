@@ -5,6 +5,7 @@ import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types
 import DateSelector, { type DateOption } from "./DateSelector";
 import GameCard from "./GameCard";
 import GameRow from "./GameRow";
+import CreateGameModal from "./CreateGameModal";
 import { useFilter } from "@/app/context/FilterContext";
 
 const titles: Record<DateOption, string> = {
@@ -13,7 +14,7 @@ const titles: Record<DateOption, string> = {
   tomorrow: "Jogos com transmissão amanhã",
 };
 
-type Props = { games: GameWithVotes[]; isLoggedIn: boolean };
+type Props = { games: GameWithVotes[]; isLoggedIn: boolean; userId?: string; canCreateGame?: boolean; isAdmin?: boolean };
 
 type LocalVotes = Record<string, Record<string, { upvoteCount: number; downvoteCount: number; userVote: "upvote" | "downvote" | null }>>;
 
@@ -74,9 +75,10 @@ function matchesQuery(game: GameWithVotes, query: string): boolean {
   );
 }
 
-export default function GamesSection({ games, isLoggedIn }: Props) {
+export default function GamesSection({ games, isLoggedIn, userId, canCreateGame, isAdmin }: Props) {
   const [selected, setSelected] = useState<DateOption>("today");
   const [localVotes, setLocalVotes] = useState<LocalVotes>({});
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const { query } = useFilter();
 
   function clearLocalVotes(gameId: string) {
@@ -129,7 +131,14 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
             <h2 className="text-lg font-semibold text-base-content">{titles[selected]}</h2>
             <p className="text-xs text-base-content/40 mt-0.5">{getDateLabel(selected)}</p>
           </div>
-          <DateSelector selected={selected} onChange={setSelected} />
+          <div className="flex items-center gap-2">
+            {canCreateGame && (
+              <button type="button" onClick={() => setShowCreateModal(true)} className="btn btn-primary btn-sm">
+                + Adicionar jogo
+              </button>
+            )}
+            <DateSelector selected={selected} onChange={setSelected} />
+          </div>
         </div>
         {withBroadcast.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -138,6 +147,8 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
                 key={game.id}
                 game={getGameWithLocalVotes(game)}
                 isLoggedIn={isLoggedIn}
+                userId={userId}
+                isAdmin={isAdmin}
                 onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
                 onVoteSettled={() => clearLocalVotes(game.id)}
               />
@@ -164,6 +175,8 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
                 key={game.id}
                 game={getGameWithLocalVotes(game)}
                 isLoggedIn={isLoggedIn}
+                userId={userId}
+                isAdmin={isAdmin}
                 onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
                 onVoteSettled={() => clearLocalVotes(game.id)}
               />
@@ -187,6 +200,8 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
                       key={game.id}
                       game={getGameWithLocalVotes(game)}
                       isLoggedIn={isLoggedIn}
+                      userId={userId}
+                      isAdmin={isAdmin}
                       onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
                       onVoteSettled={() => clearLocalVotes(game.id)}
                     />
@@ -201,6 +216,8 @@ export default function GamesSection({ games, isLoggedIn }: Props) {
           </p>
         )}
       </section>
+
+      {showCreateModal && <CreateGameModal onClose={() => setShowCreateModal(false)} />}
     </>
   );
 }

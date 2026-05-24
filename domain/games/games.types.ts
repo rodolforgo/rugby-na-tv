@@ -39,7 +39,8 @@ export type GameWithChannels = {
   awayTeamLogo: string | null;
   scoresHome: number | null;
   scoresAway: number | null;
-  channels: { id: string; name: string; logo: string | null; url: string | null }[];
+  createdByUserId: string | null;
+  channels: { id: string; name: string; logo: string | null; url: string | null; voteable: boolean }[];
 };
 
 export type ChannelWithVotes = {

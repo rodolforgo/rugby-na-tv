@@ -1,11 +1,13 @@
 import games from "@/models/games";
-import { cleanDb, createTestGame, runMigrations, waitWebServer } from "@/tests/helpers";
+import users from "@/models/users";
+import { cleanDb, createTestGame, createTestUser, runMigrations, waitWebServer } from "@/tests/helpers";
 import { mockGameData } from "@/tests/fixtures/games";
 import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.json";
 import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts.json";
 import roninBroadcastsFuzzyFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-fuzzy.json";
 import roninBroadcastsTranslationFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-translation.json";
 import { db } from "@/infra/database";
+import { ValidationError, UnauthorizedError } from "@/infra/errors";
 
 beforeAll(async () => {
   await waitWebServer();
@@ -245,5 +247,202 @@ describe("games.compareBroadcasts()", () => {
     });
 
     expect(channel).toBeDefined();
+  });
+});
+
+describe("games.createUserGame()", () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await runMigrations();
+  });
+
+  test("Cria jogo com os dados fornecidos e retorna o jogo criado", async () => {
+    const user = await createTestUser();
+
+    const game = await games.createUserGame(user.id, {
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      leagueName: "Liga Teste",
+      date: "2026-06-01",
+      time: "15:00",
+      channelName: "Canal Teste",
+    });
+
+    expect(game.homeTeamName).toBe("Time A");
+    expect(game.awayTeamName).toBe("Time B");
+    expect(game.leagueName).toBe("Liga Teste");
+    expect(game.createdByUserId).toBe(user.id);
+    expect(game.date).toEqual(new Date("2026-06-01T18:00:00Z"));
+  });
+
+  test("Canal criado é vinculado ao jogo com voteable false", async () => {
+    const user = await createTestUser();
+
+    const game = await games.createUserGame(user.id, {
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      leagueName: "Liga Teste",
+      date: "2026-06-01",
+      time: "15:00",
+      channelName: "Canal Exclusivo",
+    });
+
+    const gameChannel = await db.query.gameChannelsSchema.findFirst({
+      where: (gc, { eq }) => eq(gc.gameId, game.id),
+    });
+
+    expect(gameChannel).toBeDefined();
+    expect(gameChannel?.voteable).toBe(false);
+  });
+
+  test("Lança ValidationError se userId não existe", async () => {
+    await expect(
+      games.createUserGame("00000000-0000-0000-0000-000000000000", {
+        homeTeamName: "Time A",
+        awayTeamName: "Time B",
+        leagueName: "Liga",
+        date: "2026-06-01",
+        time: "15:00",
+        channelName: "Canal",
+      }),
+    ).rejects.toThrow(ValidationError);
+  });
+});
+
+describe("games.deleteUserGame()", () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await runMigrations();
+  });
+
+  test("Criador consegue deletar seu próprio jogo", async () => {
+    const user = await createTestUser();
+
+    const game = await games.createUserGame(user.id, {
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      leagueName: "Liga",
+      date: "2026-06-01",
+      time: "15:00",
+      channelName: "Canal",
+    });
+
+    await games.deleteUserGame(user.id, game.id);
+
+    const found = await games.findById(game.id);
+    expect(found).toBeUndefined();
+  });
+
+  test("Admin com delete:any_user_game consegue deletar jogo de outro usuário", async () => {
+    const creator = await createTestUser();
+    const admin = await createTestUser();
+    await users.addFeatureToUser(admin.id, "delete:any_user_game");
+
+    const game = await games.createUserGame(creator.id, {
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      leagueName: "Liga",
+      date: "2026-06-01",
+      time: "15:00",
+      channelName: "Canal",
+    });
+
+    await games.deleteUserGame(admin.id, game.id);
+
+    const found = await games.findById(game.id);
+    expect(found).toBeUndefined();
+  });
+
+  test("Usuário sem permissão não pode deletar jogo de outro", async () => {
+    const creator = await createTestUser();
+    const other = await createTestUser();
+
+    const game = await games.createUserGame(creator.id, {
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      leagueName: "Liga",
+      date: "2026-06-01",
+      time: "15:00",
+      channelName: "Canal",
+    });
+
+    await expect(games.deleteUserGame(other.id, game.id)).rejects.toThrow(UnauthorizedError);
+  });
+
+  test("Lança ValidationError se jogo não existe", async () => {
+    const user = await createTestUser();
+    await expect(games.deleteUserGame(user.id, "00000000-0000-0000-0000-000000000000")).rejects.toThrow(ValidationError);
+  });
+
+  test("Lança UnauthorizedError ao tentar deletar jogo sincronizado pela plataforma", async () => {
+    const apiGame = await createTestGame({
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      date: new Date("2026-06-01T15:00:00Z"),
+    });
+    const user = await createTestUser();
+
+    await expect(games.deleteUserGame(user.id, apiGame.id)).rejects.toThrow(UnauthorizedError);
+  });
+});
+
+describe("games.listByUser()", () => {
+  beforeEach(async () => {
+    await cleanDb();
+    await runMigrations();
+  });
+
+  test("Retorna apenas jogos criados pelo usuário", async () => {
+    const userA = await createTestUser();
+    const userB = await createTestUser();
+
+    await games.createUserGame(userA.id, {
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      leagueName: "Liga",
+      date: "2026-06-01",
+      time: "15:00",
+      channelName: "Canal A",
+    });
+
+    await games.createUserGame(userB.id, {
+      homeTeamName: "Time C",
+      awayTeamName: "Time D",
+      leagueName: "Liga",
+      date: "2026-06-02",
+      time: "16:00",
+      channelName: "Canal B",
+    });
+
+    const result = await games.listByUser(userA.id);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].homeTeamName).toBe("Time A");
+    expect(result[0].createdByUserId).toBe(userA.id);
+  });
+
+  test("Retorna array vazio quando usuário não tem jogos", async () => {
+    const user = await createTestUser();
+    const result = await games.listByUser(user.id);
+    expect(result).toHaveLength(0);
+  });
+
+  test("Inclui canal com voteable false no jogo listado", async () => {
+    const user = await createTestUser();
+
+    await games.createUserGame(user.id, {
+      homeTeamName: "Time A",
+      awayTeamName: "Time B",
+      leagueName: "Liga",
+      date: "2026-06-01",
+      time: "15:00",
+      channelName: "Meu Canal",
+    });
+
+    const result = await games.listByUser(user.id);
+
+    expect(result[0].channels).toHaveLength(1);
+    expect(result[0].channels[0].name).toBe("Meu Canal");
+    expect(result[0].channels[0].voteable).toBe(false);
   });
 });

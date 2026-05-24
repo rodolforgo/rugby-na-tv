@@ -4,6 +4,8 @@ import type { CreateSessionSchema } from "@/domain/sessions/sessions.schema";
 import users from "@/models/users";
 import authorization from "@/models/authorization";
 import { UnauthorizedError } from "@/infra/errors";
+import { cookies } from "next/headers";
+import { and, eq, gt } from "drizzle-orm";
 
 async function createSession(credentials: CreateSessionSchema) {
   const user = await users.getUserByEmail(credentials.email);
@@ -24,6 +26,19 @@ async function createSession(credentials: CreateSessionSchema) {
   return newSession[0];
 }
 
-const sessions = { createSession };
+async function requireSession(): Promise<string> {
+  const token = (await cookies()).get("session_token")?.value;
+  if (!token) throw new UnauthorizedError();
+
+  const session = await db.query.sessionSchema.findFirst({
+    where: and(eq(sessionSchema.sessionToken, token), gt(sessionSchema.expires, new Date())),
+  });
+
+  if (!session) throw new UnauthorizedError();
+
+  return session.userId;
+}
+
+const sessions = { createSession, requireSession };
 
 export default sessions;
