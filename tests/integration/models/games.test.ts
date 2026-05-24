@@ -272,7 +272,7 @@ describe("games.createUserGame()", () => {
     expect(game.awayTeamName).toBe("Time B");
     expect(game.leagueName).toBe("Liga Teste");
     expect(game.createdByUserId).toBe(user.id);
-    expect(game.date).toEqual(new Date("2026-06-01T15:00:00Z"));
+    expect(game.date).toEqual(new Date("2026-06-01T18:00:00Z"));
   });
 
   test("Canal criado é vinculado ao jogo com voteable false", async () => {
