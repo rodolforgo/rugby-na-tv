@@ -179,7 +179,7 @@ describe("games.compareBroadcasts()", () => {
       homeTeamName: "Chiefs",
       awayTeamName: "Highlanders",
       leagueName: "Super Rugby Pacific",
-      date: new Date("2026-05-15T00:00:00Z"),
+      date: new Date("2026-05-15T13:00:00Z"),
     });
 
     jest.spyOn(global, "fetch").mockResolvedValueOnce({

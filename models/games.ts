@@ -167,8 +167,8 @@ async function findByApiId(apiId: number) {
 }
 
 async function findGamesByDate(date: string) {
-  const start = new Date(`${date}T00:00:00Z`);
-  const end = new Date(`${date}T00:00:00Z`);
+  const start = new Date(`${date}T03:00:00Z`);
+  const end = new Date(`${date}T03:00:00Z`);
   end.setUTCDate(end.getUTCDate() + 1);
 
   return await db
