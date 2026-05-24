@@ -1,25 +1,42 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import { formatTime } from "@/app/lib/format";
 import TeamLogo from "./TeamLogo";
 import SuggestChannelModal from "./SuggestChannelModal";
+import ConfirmModal from "./ConfirmModal";
 import { useGameVoting } from "./useGameVoting";
+import { TrashIcon } from "@/app/lib/icons";
 
 type Props = {
   game: GameWithVotes;
   isLoggedIn: boolean;
+  userId?: string;
+  isAdmin?: boolean;
   onVote: (channelId: string, voteType: "upvote" | "downvote") => void;
   onVoteSettled: () => void;
 };
 
-export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Props) {
+export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, onVoteSettled }: Props) {
+  const router = useRouter();
+  const [showConfirm, setShowConfirm] = useState(false);
   const { vote, openModal, handleConfirm, isPending, dialogRef, selectedChannelId, setSelectedChannelId } = useGameVoting({
     game,
     isLoggedIn,
     onVote,
     onVoteSettled,
   });
+
+  const isCommunityGame = game.createdByUserId !== null;
+  const canDelete = isCommunityGame && (game.createdByUserId === userId || isAdmin);
+
+  async function handleDelete() {
+    await fetch(`/api/v1/games/${game.id}`, { method: "DELETE" });
+    setShowConfirm(false);
+    router.refresh();
+  }
 
   const hasScore = game.scoresHome !== null && game.scoresAway !== null;
   const isFromRonin = game.channels.length > 0;
@@ -37,8 +54,21 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
               {game.countryFlag ? <img src={game.countryFlag} alt={game.countryName} className="w-4 h-3 object-cover rounded-sm" /> : null}
               {game.leagueLogo ? <img src={game.leagueLogo} alt={game.leagueName} className="w-4 h-4 object-contain" /> : null}
               <span className="text-xs text-base-content/50 truncate">{game.leagueName}</span>
+              {isCommunityGame && <span className="badge badge-warning badge-xs shrink-0">Comunidade</span>}
             </div>
-            <span className="text-xs font-bold text-base-content/60 shrink-0">{formatTime(new Date(game.date))}</span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {canDelete && (
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  title="Deletar jogo"
+                  className="text-base-content/30 hover:text-error transition-colors cursor-pointer"
+                >
+                  <TrashIcon className="w-3.5 h-3.5" />
+                </button>
+              )}
+              <span className="text-xs font-bold text-base-content/60">{formatTime(new Date(game.date))}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -95,6 +125,14 @@ export default function GameCard({ game, isLoggedIn, onVote, onVoteSettled }: Pr
         onConfirm={handleConfirm}
         dialogRef={dialogRef}
       />
+
+      {showConfirm && (
+        <ConfirmModal
+          message={`Tem certeza que deseja deletar o jogo ${game.homeTeamName} × ${game.awayTeamName}?`}
+          onConfirm={handleDelete}
+          onClose={() => setShowConfirm(false)}
+        />
+      )}
     </>
   );
 }

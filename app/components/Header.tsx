@@ -30,11 +30,16 @@ export default async function Header() {
           </div>
 
           {session ? (
-            <form action={logout} className="shrink-0">
-              <button type="submit" className="btn btn-ghost btn-sm">
-                Sair
-              </button>
-            </form>
+            <div className="flex items-center gap-2 shrink-0">
+              <a href="/meus-jogos" className="btn btn-ghost btn-sm">
+                Meus jogos
+              </a>
+              <form action={logout}>
+                <button type="submit" className="btn btn-ghost btn-sm">
+                  Sair
+                </button>
+              </form>
+            </div>
           ) : (
             <a href="/?modal=login" className="btn btn-primary btn-sm shrink-0">
               Entrar
