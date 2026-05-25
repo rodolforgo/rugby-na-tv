@@ -2,11 +2,11 @@ export type ApiGame = {
   id: number;
   date: string;
   timestamp: number;
-  country: { name: string; flag: string | null };
-  league: { name: string; logo: string | null };
+  country: { name: string };
+  league: { name: string };
   teams: {
-    home: { name: string; logo: string | null };
-    away: { name: string; logo: string | null };
+    home: { name: string };
+    away: { name: string };
   };
   scores: { home: number | null; away: number | null };
 };
@@ -15,11 +15,11 @@ export type GameData = {
   apiId: number | null;
   date: string;
   timestamp: number;
-  country: { name: string; flag: string | null };
-  league: { name: string; logo: string | null };
+  country: { name: string };
+  league: { name: string };
   teams: {
-    home: { name: string; logo: string | null };
-    away: { name: string; logo: string | null };
+    home: { name: string };
+    away: { name: string };
   };
   scores: { home: number | null; away: number | null };
 };
@@ -30,23 +30,18 @@ export type GameWithChannels = {
   id: string;
   date: Date;
   leagueName: string;
-  leagueLogo: string | null;
   countryName: string;
-  countryFlag: string | null;
   homeTeamName: string;
-  homeTeamLogo: string | null;
   awayTeamName: string;
-  awayTeamLogo: string | null;
   scoresHome: number | null;
   scoresAway: number | null;
   createdByUserId: string | null;
-  channels: { id: string; name: string; logo: string | null; url: string | null; voteable: boolean }[];
+  channels: { id: string; name: string; url: string | null; voteable: boolean }[];
 };
 
 export type ChannelWithVotes = {
   id: string;
   name: string;
-  logo: string | null;
   url: string | null;
   upvoteCount: number;
   downvoteCount: number;
