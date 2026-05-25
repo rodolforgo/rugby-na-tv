@@ -92,6 +92,13 @@
       "when": 1779580359989,
       "tag": "0012_sparkling_jackpot",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1779737262494,
+      "tag": "0013_strange_husk",
+      "breakpoints": true
     }
   ]
 }
