@@ -15,7 +15,7 @@ export default function TeamLogo({ logo, name, size = "md" }: Props) {
   const sizeClass = size === "sm" ? "w-7 h-7 text-xs" : "w-10 h-10 text-sm";
 
   if (logo) {
-    return <img src={logo} alt={name} className={`${sizeClass} object-contain`} />;
+    return <img src={logo} alt={name} referrerPolicy="no-referrer" className={`${sizeClass} object-contain`} />;
   }
 
   return (
