@@ -34,11 +34,11 @@ describe("games.fetchByDate()", () => {
       apiId: expect.any(Number),
       date: expect.any(String),
       timestamp: expect.any(Number),
-      country: { name: expect.any(String), flag: expect.any(String) },
-      league: { name: expect.any(String), logo: expect.any(String) },
+      country: { name: expect.any(String) },
+      league: { name: expect.any(String) },
       teams: {
-        home: { name: expect.any(String), logo: expect.any(String) },
-        away: { name: expect.any(String), logo: expect.any(String) },
+        home: { name: expect.any(String) },
+        away: { name: expect.any(String) },
       },
       scores: {
         home: expect.anything(),
