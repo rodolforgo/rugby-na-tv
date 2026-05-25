@@ -48,14 +48,14 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
 
           <div className="flex-1 min-w-0 flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <TeamLogo logo={game.homeTeamLogo} name={game.homeTeamName} size="sm" />
+              <TeamLogo name={game.homeTeamName} size="sm" />
               <span className="text-base-content font-medium truncate">{game.homeTeamName}</span>
               {game.scoresHome !== null && (
                 <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresHome}</span>
               )}
             </div>
             <div className="flex items-center gap-2">
-              <TeamLogo logo={game.awayTeamLogo} name={game.awayTeamName} size="sm" />
+              <TeamLogo name={game.awayTeamName} size="sm" />
               <span className="text-base-content font-medium truncate">{game.awayTeamName}</span>
               {game.scoresAway !== null && (
                 <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresAway}</span>

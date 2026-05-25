@@ -51,8 +51,6 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
         <div className="card-body p-4 gap-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5">
-              {game.countryFlag ? <img src={game.countryFlag} alt={game.countryName} referrerPolicy="no-referrer" className="w-4 h-3 object-cover rounded-sm" /> : null}
-              {game.leagueLogo ? <img src={game.leagueLogo} alt={game.leagueName} referrerPolicy="no-referrer" className="w-4 h-4 object-contain" /> : null}
               <span className="text-xs text-base-content/50 truncate">{game.leagueName}</span>
               {isCommunityGame && <span className="badge badge-warning badge-xs shrink-0">Comunidade</span>}
             </div>
@@ -73,7 +71,7 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
 
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-center gap-1 flex-1">
-              <TeamLogo logo={game.homeTeamLogo} name={game.homeTeamName} />
+              <TeamLogo name={game.homeTeamName} />
               <span className="text-xs font-medium text-base-content text-center leading-tight">{game.homeTeamName}</span>
             </div>
 
@@ -86,7 +84,7 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
             )}
 
             <div className="flex flex-col items-center gap-1 flex-1">
-              <TeamLogo logo={game.awayTeamLogo} name={game.awayTeamName} />
+              <TeamLogo name={game.awayTeamName} />
               <span className="text-xs font-medium text-base-content text-center leading-tight">{game.awayTeamName}</span>
             </div>
           </div>
@@ -94,7 +92,6 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
           <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-base-200">
             {officialChannels.map((channel) => (
               <div key={channel.id} className="flex items-center gap-1 badge badge-soft badge-primary text-xs">
-                {channel.logo ? <img src={channel.logo} alt={channel.name} referrerPolicy="no-referrer" className="w-3 h-3 object-contain" /> : null}
                 {channel.name}
               </div>
             ))}
@@ -151,7 +148,6 @@ function ChannelVoteBadge({ channel, onVote, variant, isPending }: ChannelVoteBa
 
   return (
     <div className={`flex items-center gap-1 badge badge-soft ${baseColor} text-xs pr-0 overflow-hidden`}>
-      {channel.logo ? <img src={channel.logo} alt={channel.name} className="w-3 h-3 object-contain" /> : null}
       <span>{channel.name}</span>
       <button
         type="button"

@@ -1,10 +1,9 @@
 type Props = {
-  logo: string | null;
   name: string;
   size?: "sm" | "md";
 };
 
-export default function TeamLogo({ logo, name, size = "md" }: Props) {
+export default function TeamLogo({ name, size = "md" }: Props) {
   const initials = name
     .split(" ")
     .map((w) => w[0])
@@ -13,10 +12,6 @@ export default function TeamLogo({ logo, name, size = "md" }: Props) {
     .toUpperCase();
 
   const sizeClass = size === "sm" ? "w-7 h-7 text-xs" : "w-10 h-10 text-sm";
-
-  if (logo) {
-    return <img src={logo} alt={name} referrerPolicy="no-referrer" className={`${sizeClass} object-contain`} />;
-  }
 
   return (
     <div className={`${sizeClass} rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary shrink-0`}>
