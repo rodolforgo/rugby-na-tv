@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import { formatTime } from "@/app/shared/lib/format";
+import TeamLogo from "./TeamLogo";
 import SuggestChannelModal from "./SuggestChannelModal";
 import ConfirmModal from "./ConfirmModal";
 import { useGameVoting } from "./useGameVoting";
@@ -69,7 +70,10 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-xs font-medium text-base-content text-center leading-tight flex-1">{game.homeTeamName}</span>
+            <div className="flex flex-col items-center gap-1 flex-1">
+              <TeamLogo name={game.homeTeamName} logo={game.homeTeamLogo} />
+              <span className="text-xs font-medium text-base-content text-center leading-tight">{game.homeTeamName}</span>
+            </div>
 
             {hasScore ? (
               <span className="text-lg font-bold text-base-content shrink-0">
@@ -79,7 +83,10 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
               <span className="text-sm text-base-content/30 shrink-0">×</span>
             )}
 
-            <span className="text-xs font-medium text-base-content text-center leading-tight flex-1">{game.awayTeamName}</span>
+            <div className="flex flex-col items-center gap-1 flex-1">
+              <TeamLogo name={game.awayTeamName} logo={game.awayTeamLogo} />
+              <span className="text-xs font-medium text-base-content text-center leading-tight">{game.awayTeamName}</span>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-base-200">
