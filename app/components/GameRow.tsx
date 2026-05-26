@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import { formatTime } from "@/app/shared/lib/format";
-import TeamLogo from "./TeamLogo";
 import SuggestChannelModal from "./SuggestChannelModal";
 import ConfirmModal from "./ConfirmModal";
 import { useGameVoting } from "./useGameVoting";
@@ -48,14 +47,12 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
 
           <div className="flex-1 min-w-0 flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <TeamLogo name={game.homeTeamName} size="sm" />
               <span className="text-base-content font-medium truncate">{game.homeTeamName}</span>
               {game.scoresHome !== null && (
                 <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresHome}</span>
               )}
             </div>
             <div className="flex items-center gap-2">
-              <TeamLogo name={game.awayTeamName} size="sm" />
               <span className="text-base-content font-medium truncate">{game.awayTeamName}</span>
               {game.scoresAway !== null && (
                 <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresAway}</span>
