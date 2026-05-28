@@ -4,11 +4,11 @@ export const mockGameData: GameData = {
   apiId: 8279,
   date: "2018-09-22T12:45:00+00:00",
   timestamp: 1537620300,
-  country: { name: "France" },
-  league: { name: "Top 14" },
+  country: { name: "France", flag: "https://media.api-sports.io/flags/fr.svg" },
+  league: { name: "Top 14", logo: "https://media.api-sports.io/rugby/leagues/16.png" },
   teams: {
-    home: { name: "Bordeaux Begles" },
-    away: { name: "Clermont" },
+    home: { name: "Bordeaux Begles", logo: "https://media.api-sports.io/rugby/teams/96.png" },
+    away: { name: "Clermont", logo: "https://media.api-sports.io/rugby/teams/99.png" },
   },
   scores: { home: 23, away: 19 },
 };
