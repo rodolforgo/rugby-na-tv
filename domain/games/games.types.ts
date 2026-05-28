@@ -76,7 +76,7 @@ type RoninFixture = {
   home_team: string;
   visiting_team: string;
   league: string;
-  channels: { name: string }[];
+  channels: { name: string }[] | null;
 };
 
 export type RoninApiResponse = Array<{
