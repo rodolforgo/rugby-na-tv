@@ -100,7 +100,7 @@ async function syncByDate(date: string) {
 async function listForDisplay(): Promise<GameWithChannels[]> {
   const today = new Date();
   const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
-  const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 2));
+  const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 2, 3, 0, 0));
 
   const rows = await db.query.gamesSchema.findMany({
     where: (g, { and, gte, lt }) => and(gte(g.date, start), lt(g.date, end)),
