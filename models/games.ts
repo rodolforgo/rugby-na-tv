@@ -176,7 +176,7 @@ async function fetchBroadcastsByDate(date: string): Promise<Broadcast[]> {
           homeTeam: f.home_team,
           visitingTeam: f.visiting_team,
           league: f.league,
-          channels: f.channels.map((c) => ({ name: c.name })),
+          channels: (f.channels ?? []).map((c) => ({ name: c.name })),
         })),
       ),
     ),
