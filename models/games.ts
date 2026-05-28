@@ -168,8 +168,8 @@ async function fetchBroadcastsByDate(date: string): Promise<Broadcast[]> {
   const data: RoninApiResponse = await response.json();
 
   return (data?.[0]?.sports?.[0] ?? []).flatMap((day) =>
-    day.sports.flatMap((sport) =>
-      sport.leagues.flatMap((league) =>
+    (day.sports ?? []).flatMap((sport) =>
+      (sport.leagues ?? []).flatMap((league) =>
         [...(league.oldFixtures ?? []), ...(league.fixtures ?? [])].map((f) => ({
           id: f.fixture_id,
           date: f.date,
