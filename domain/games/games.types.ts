@@ -73,9 +73,9 @@ export type Broadcast = {
 type RoninFixture = {
   fixture_id: number;
   date: string;
-  home_team: string;
-  visiting_team: string;
-  league: string;
+  home_team: string | null;
+  visiting_team: string | null;
+  league: string | null;
   channels: { name: string }[] | null;
 };
 
