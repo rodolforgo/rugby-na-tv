@@ -69,6 +69,10 @@ async function createGame(data: GameData) {
     .onConflictDoUpdate({
       target: gamesSchema.apiId,
       set: {
+        countryFlag: data.country.flag,
+        leagueLogo: data.league.logo,
+        homeTeamLogo: data.teams.home.logo,
+        awayTeamLogo: data.teams.away.logo,
         scoresHome: data.scores.home,
         scoresAway: data.scores.away,
         updated_at: new Date(),
