@@ -6,6 +6,7 @@ export const broadcastLogsSchema = pgTable("broadcast_logs", {
   roninTotal: integer().notNull(),
   dbGamesTotal: integer().notNull(),
   matched: integer().notNull(),
+  created: integer().notNull().default(0),
   unmatched: jsonb().$type<{ homeTeam: string; visitingTeam: string; league: string }[]>().notNull(),
   created_at: timestamp({ withTimezone: true }).defaultNow().notNull(),
 });

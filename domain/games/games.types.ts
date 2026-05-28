@@ -61,6 +61,7 @@ export type BroadcastCompareResult = {
   roninTotal: number;
   dbGamesTotal: number;
   matched: number;
+  created: number;
   unmatched: { homeTeam: string; visitingTeam: string; league: string }[];
 };
 

@@ -1,0 +1,1 @@
+ALTER TABLE "broadcast_logs" ADD COLUMN "created" integer DEFAULT 0 NOT NULL;

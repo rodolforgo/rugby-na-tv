@@ -234,6 +234,7 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
 
   const unmatched: BroadcastCompareResult["unmatched"] = [];
   let matched = 0;
+  let created = 0;
 
   for (const broadcast of broadcasts) {
     let game = dbGames.find(
@@ -251,6 +252,10 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
         }
       }
       if (bestScore >= 3) game = bestGame;
+      else if (bestScore === 2) {
+        unmatched.push({ homeTeam: broadcast.homeTeam, visitingTeam: broadcast.visitingTeam, league: broadcast.league });
+        continue;
+      }
     }
 
     if (game) {
@@ -269,17 +274,36 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
         await db.insert(gameChannelsSchema).values({ gameId: game.id, channelId }).onConflictDoNothing();
       }
     } else {
-      unmatched.push({ homeTeam: broadcast.homeTeam, visitingTeam: broadcast.visitingTeam, league: broadcast.league });
+      const roninDate = new Date(broadcast.date);
+      const [newGame] = await db
+        .insert(gamesSchema)
+        .values({
+          date: Number.isNaN(roninDate.getTime()) ? new Date() : roninDate,
+          timestamp: Number.isNaN(roninDate.getTime()) ? 0 : Math.floor(roninDate.getTime() / 1000),
+          homeTeamName: broadcast.homeTeam,
+          awayTeamName: broadcast.visitingTeam,
+          leagueName: broadcast.league,
+          countryName: "",
+        })
+        .returning();
+
+      for (const channel of broadcast.channels) {
+        const channelId = await findOrCreateChannel(channel.name);
+        await db.insert(gameChannelsSchema).values({ gameId: newGame.id, channelId }).onConflictDoNothing();
+      }
+
+      created++;
     }
   }
 
-  const result = { date, roninTotal: broadcasts.length, dbGamesTotal: dbGames.length, matched, unmatched };
+  const result = { date, roninTotal: broadcasts.length, dbGamesTotal: dbGames.length, matched, created, unmatched };
 
   await db.insert(broadcastLogsSchema).values({
     syncedDate: date,
     roninTotal: result.roninTotal,
     dbGamesTotal: result.dbGamesTotal,
     matched: result.matched,
+    created: result.created,
     unmatched: result.unmatched,
   });
 
