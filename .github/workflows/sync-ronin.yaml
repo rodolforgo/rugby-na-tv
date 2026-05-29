@@ -1,0 +1,23 @@
+name: Sync de transmissões (Ronin)
+
+on:
+  schedule:
+    - cron: "0 6,8,10,12,14,16,18,20,22 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Match de transmissões
+    runs-on: ubuntu-latest
+    steps:
+      - name: Match de transmissões de hoje
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+          curl --fail -X GET "${{ vars.APP_URL }}/api/v1/games/ronin-api?date=$TODAY" \
+            -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}"
+
+      - name: Match de transmissões de amanhã
+        run: |
+          TOMORROW=$(date -u -d "+1 day" +%Y-%m-%d)
+          curl --fail -X GET "${{ vars.APP_URL }}/api/v1/games/ronin-api?date=$TOMORROW" \
+            -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}"

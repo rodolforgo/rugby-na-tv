@@ -1,4 +1,4 @@
-name: Sync de jogos
+name: Sync de jogos (API Sports)
 
 on:
   schedule:
@@ -26,15 +26,3 @@ jobs:
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}" \
             -d "{\"date\": \"$TOMORROW\"}"
-
-      - name: Match de transmissões de hoje
-        run: |
-          TODAY=$(date -u +%Y-%m-%d)
-          curl --fail -X GET "${{ vars.APP_URL }}/api/v1/games/ronin-api?date=$TODAY" \
-            -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}"
-
-      - name: Match de transmissões de amanhã
-        run: |
-          TOMORROW=$(date -u -d "+1 day" +%Y-%m-%d)
-          curl --fail -X GET "${{ vars.APP_URL }}/api/v1/games/ronin-api?date=$TOMORROW" \
-            -H "Authorization: Bearer ${{ secrets.SYNC_SECRET }}"
