@@ -1,0 +1,28 @@
+[
+  {
+    "sports": [
+      [
+        {
+          "sports": [
+            {
+              "leagues": [
+                {
+                  "fixtures": [
+                    {
+                      "fixture_id": 99999,
+                      "date": "2026-05-15T08:00:00.000Z",
+                      "home_team": null,
+                      "visiting_team": null,
+                      "league": "World Rugby Sevens Series",
+                      "channels": [{ "name": "Disney+ Brasil" }]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    ]
+  }
+]

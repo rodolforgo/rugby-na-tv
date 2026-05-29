@@ -235,11 +235,16 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
   let created = 0;
 
   for (const broadcast of broadcasts) {
-    let game = dbGames.find(
-      (g) => normalize(broadcast.homeTeam) === normalize(g.homeTeamName) && normalize(broadcast.visitingTeam) === normalize(g.awayTeamName),
-    );
+    const hasTeams = broadcast.homeTeam !== "" && broadcast.visitingTeam !== "";
 
-    if (!game) {
+    let game = hasTeams
+      ? dbGames.find(
+          (g) =>
+            normalize(broadcast.homeTeam) === normalize(g.homeTeamName) && normalize(broadcast.visitingTeam) === normalize(g.awayTeamName),
+        )
+      : undefined;
+
+    if (hasTeams && !game) {
       let bestScore = 0;
       let bestGame: (typeof dbGames)[number] | undefined;
       for (const candidate of dbGames) {

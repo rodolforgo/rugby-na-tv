@@ -6,6 +6,7 @@ import gamesByDateFixture from "@/tests/fixtures/api-responses/games-by-date.jso
 import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts.json";
 import roninBroadcastsFuzzyFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-fuzzy.json";
 import roninBroadcastsTranslationFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-translation.json";
+import roninBroadcastsNullTeamsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-null-teams.json";
 import { db } from "@/infra/database";
 import { ValidationError, UnauthorizedError } from "@/infra/errors";
 
@@ -223,6 +224,42 @@ describe("games.compareBroadcasts()", () => {
 
     expect(updated?.date).toEqual(expectedDate);
     expect(updated?.timestamp).toBe(Math.floor(expectedDate.getTime() / 1000));
+  });
+
+  test("Fixture com times nulos não dá match em jogo existente", async () => {
+    await createTestGame({
+      homeTeamName: "Canada 7s W",
+      awayTeamName: "Spain 7s",
+      leagueName: "Seven's World Series Women",
+      date: new Date("2026-05-15T11:00:00Z"),
+    });
+
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsNullTeamsFixture,
+    } as Response);
+
+    const result = await games.compareBroadcasts("2026-05-15");
+
+    expect(result.matched).toBe(0);
+    expect(result.created).toBe(1);
+  });
+
+  test("Fixture com times nulos é criado como novo jogo no banco", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsNullTeamsFixture,
+    } as Response);
+
+    const result = await games.compareBroadcasts("2026-05-15");
+
+    expect(result.created).toBe(1);
+
+    const created = await db.query.gamesSchema.findFirst({
+      where: (g, { eq }) => eq(g.leagueName, "World Rugby Sevens Series"),
+    });
+
+    expect(created).toBeDefined();
+    expect(created?.homeTeamName).toBe("");
+    expect(created?.awayTeamName).toBe("");
   });
 
   test("Encontra correspondência quando nomes dos times estão em português e liga está reordenada", async () => {
