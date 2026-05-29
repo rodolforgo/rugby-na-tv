@@ -242,7 +242,7 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
           (g) =>
             normalize(broadcast.homeTeam) === normalize(g.homeTeamName) && normalize(broadcast.visitingTeam) === normalize(g.awayTeamName),
         )
-      : undefined;
+      : dbGames.find((g) => g.homeTeamName === "" && g.awayTeamName === "" && normalize(g.leagueName) === normalize(broadcast.league));
 
     if (hasTeams && !game) {
       let bestScore = 0;

@@ -262,6 +262,24 @@ describe("games.compareBroadcasts()", () => {
     expect(created?.awayTeamName).toBe("");
   });
 
+  test("Fixture com times nulos dá match em jogo nulo existente sem criar duplicata", async () => {
+    await createTestGame({
+      homeTeamName: "",
+      awayTeamName: "",
+      leagueName: "World Rugby Sevens Series",
+      date: new Date("2026-05-15T08:00:00.000Z"),
+    });
+
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsNullTeamsFixture,
+    } as Response);
+
+    const result = await games.compareBroadcasts("2026-05-15");
+
+    expect(result.matched).toBe(1);
+    expect(result.created).toBe(0);
+  });
+
   test("Encontra correspondência quando nomes dos times estão em português e liga está reordenada", async () => {
     await createTestGame({
       homeTeamName: "Wales W",
