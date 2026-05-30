@@ -7,6 +7,7 @@ import roninBroadcastsFixture from "@/tests/fixtures/api-responses/ronin-broadca
 import roninBroadcastsFuzzyFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-fuzzy.json";
 import roninBroadcastsTranslationFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-translation.json";
 import roninBroadcastsNullTeamsFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-null-teams.json";
+import roninBroadcastsNullTeamsMultipleFixture from "@/tests/fixtures/api-responses/ronin-broadcasts-null-teams-multiple.json";
 import { db } from "@/infra/database";
 import { ValidationError, UnauthorizedError } from "@/infra/errors";
 
@@ -278,6 +279,36 @@ describe("games.compareBroadcasts()", () => {
 
     expect(result.matched).toBe(1);
     expect(result.created).toBe(0);
+  });
+
+  test("Jogo com times criado pela Ronin não é duplicado em sync seguinte", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValue({
+      json: async () => roninBroadcastsFixture,
+    } as Response);
+
+    const first = await games.compareBroadcasts("2026-05-15");
+    expect(first.created).toBe(1);
+    expect(first.matched).toBe(0);
+
+    const second = await games.compareBroadcasts("2026-05-15");
+    expect(second.created).toBe(0);
+    expect(second.matched).toBe(1);
+
+    const all = await games.findGamesByDate("2026-05-15");
+    expect(all).toHaveLength(1);
+  });
+
+  test("Múltiplas fixtures sem times na mesma liga não duplicam no mesmo sync", async () => {
+    jest.spyOn(global, "fetch").mockResolvedValueOnce({
+      json: async () => roninBroadcastsNullTeamsMultipleFixture,
+    } as Response);
+
+    const result = await games.compareBroadcasts("2026-05-15");
+
+    expect(result.created).toBe(1);
+
+    const all = await games.findGamesByDate("2026-05-15");
+    expect(all).toHaveLength(1);
   });
 
   test("Encontra correspondência quando nomes dos times estão em português e liga está reordenada", async () => {

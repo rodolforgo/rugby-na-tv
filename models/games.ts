@@ -228,34 +228,86 @@ function scoreMatch(broadcast: Broadcast, game: { homeTeamName: string; awayTeam
 }
 
 async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> {
+  const MATCH_SCORE_THRESHOLD = 3;
+  const AMBIGUOUS_MATCH_SCORE = 2;
+
+  type GameRow = typeof gamesSchema.$inferSelect;
+
+  function broadcastHasTeams(broadcast: Broadcast): boolean {
+    return broadcast.homeTeam !== "" && broadcast.visitingTeam !== "";
+  }
+
+  function findExactGame(broadcast: Broadcast, candidates: GameRow[]): GameRow | undefined {
+    if (broadcastHasTeams(broadcast)) {
+      return candidates.find(
+        (g) =>
+          normalize(broadcast.homeTeam) === normalize(g.homeTeamName) && normalize(broadcast.visitingTeam) === normalize(g.awayTeamName),
+      );
+    }
+
+    return candidates.find(
+      (g) => g.homeTeamName === "" && g.awayTeamName === "" && normalize(g.leagueName) === normalize(broadcast.league),
+    );
+  }
+
+  function findBestFuzzyGame(broadcast: Broadcast, candidates: GameRow[]): { game: GameRow | undefined; score: number } {
+    let bestScore = 0;
+    let bestGame: GameRow | undefined;
+
+    for (const candidate of candidates) {
+      const score = scoreMatch(broadcast, candidate);
+      if (score > bestScore) {
+        bestScore = score;
+        bestGame = candidate;
+      }
+    }
+
+    return { game: bestGame, score: bestScore };
+  }
+
+  function broadcastDate(broadcast: Broadcast): Date | undefined {
+    const parsed = new Date(broadcast.date);
+    return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+  }
+
+  async function attachChannels(gameId: string, channels: Broadcast["channels"]): Promise<void> {
+    for (const channel of channels) {
+      const channelId = await findOrCreateChannel(channel.name);
+      await db.insert(gameChannelsSchema).values({ gameId, channelId }).onConflictDoNothing();
+    }
+  }
+
+  async function createGameFromBroadcast(broadcast: Broadcast): Promise<GameRow> {
+    const parsed = broadcastDate(broadcast);
+    const [created] = await db
+      .insert(gamesSchema)
+      .values({
+        date: parsed ?? new Date(),
+        timestamp: parsed ? Math.floor(parsed.getTime() / 1000) : 0,
+        homeTeamName: broadcast.homeTeam,
+        awayTeamName: broadcast.visitingTeam,
+        leagueName: broadcast.league,
+        countryName: "",
+      })
+      .returning();
+    return created;
+  }
+
   const [broadcasts, dbGames] = await Promise.all([fetchBroadcastsByDate(date), findGamesByDate(date)]);
+  const dbGamesTotal = dbGames.length;
 
   const unmatched: BroadcastCompareResult["unmatched"] = [];
   let matched = 0;
   let created = 0;
 
   for (const broadcast of broadcasts) {
-    const hasTeams = broadcast.homeTeam !== "" && broadcast.visitingTeam !== "";
+    let game = findExactGame(broadcast, dbGames);
 
-    let game = hasTeams
-      ? dbGames.find(
-          (g) =>
-            normalize(broadcast.homeTeam) === normalize(g.homeTeamName) && normalize(broadcast.visitingTeam) === normalize(g.awayTeamName),
-        )
-      : dbGames.find((g) => g.homeTeamName === "" && g.awayTeamName === "" && normalize(g.leagueName) === normalize(broadcast.league));
-
-    if (hasTeams && !game) {
-      let bestScore = 0;
-      let bestGame: (typeof dbGames)[number] | undefined;
-      for (const candidate of dbGames) {
-        const score = scoreMatch(broadcast, candidate);
-        if (score > bestScore) {
-          bestScore = score;
-          bestGame = candidate;
-        }
-      }
-      if (bestScore >= 3) game = bestGame;
-      else if (bestScore === 2) {
+    if (!game && broadcastHasTeams(broadcast)) {
+      const fuzzy = findBestFuzzyGame(broadcast, dbGames);
+      if (fuzzy.score >= MATCH_SCORE_THRESHOLD) {
+        game = fuzzy.game;
+      } else if (fuzzy.score === AMBIGUOUS_MATCH_SCORE) {
         unmatched.push({ homeTeam: broadcast.homeTeam, visitingTeam: broadcast.visitingTeam, league: broadcast.league });
         continue;
       }
@@ -264,42 +316,24 @@ async function compareBroadcasts(date: string): Promise<BroadcastCompareResult> 
     if (game) {
       matched++;
 
-      const roninDate = new Date(broadcast.date);
-      if (!Number.isNaN(roninDate.getTime())) {
+      const roninDate = broadcastDate(broadcast);
+      if (roninDate) {
         await db
           .update(gamesSchema)
           .set({ date: roninDate, timestamp: Math.floor(roninDate.getTime() / 1000) })
           .where(eq(gamesSchema.id, game.id));
       }
 
-      for (const channel of broadcast.channels) {
-        const channelId = await findOrCreateChannel(channel.name);
-        await db.insert(gameChannelsSchema).values({ gameId: game.id, channelId }).onConflictDoNothing();
-      }
+      await attachChannels(game.id, broadcast.channels);
     } else {
-      const roninDate = new Date(broadcast.date);
-      const [newGame] = await db
-        .insert(gamesSchema)
-        .values({
-          date: Number.isNaN(roninDate.getTime()) ? new Date() : roninDate,
-          timestamp: Number.isNaN(roninDate.getTime()) ? 0 : Math.floor(roninDate.getTime() / 1000),
-          homeTeamName: broadcast.homeTeam,
-          awayTeamName: broadcast.visitingTeam,
-          leagueName: broadcast.league,
-          countryName: "",
-        })
-        .returning();
-
-      for (const channel of broadcast.channels) {
-        const channelId = await findOrCreateChannel(channel.name);
-        await db.insert(gameChannelsSchema).values({ gameId: newGame.id, channelId }).onConflictDoNothing();
-      }
-
+      const newGame = await createGameFromBroadcast(broadcast);
+      dbGames.push(newGame);
+      await attachChannels(newGame.id, broadcast.channels);
       created++;
     }
   }
 
-  const result = { date, roninTotal: broadcasts.length, dbGamesTotal: dbGames.length, matched, created, unmatched };
+  const result = { date, roninTotal: broadcasts.length, dbGamesTotal, matched, created, unmatched };
 
   await db.insert(broadcastLogsSchema).values({
     syncedDate: date,
