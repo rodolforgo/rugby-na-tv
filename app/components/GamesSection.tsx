@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import DateSelector, { type DateOption } from "./DateSelector";
-import GameCard from "./GameCard";
 import GameRow from "./GameRow";
 import CreateGameModal from "./CreateGameModal";
 import { useFilter } from "@/app/shared/context/FilterContext";
@@ -129,7 +128,7 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-lg font-semibold text-base-content">{titles[selected]}</h2>
-            <p className="text-xs text-base-content/40 mt-0.5">{getDateLabel(selected)}</p>
+            <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel(selected)}</p>
           </div>
           <div className="flex items-center gap-2">
             {canCreateGame && (
@@ -141,57 +140,10 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
           </div>
         </div>
         {withBroadcast.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {withBroadcast.map((game) => (
-              <GameCard
-                key={game.id}
-                game={getGameWithLocalVotes(game)}
-                isLoggedIn={isLoggedIn}
-                userId={userId}
-                isAdmin={isAdmin}
-                onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
-                onVoteSettled={() => clearLocalVotes(game.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-base-content/40">
-            {query.trim()
-              ? `Nenhum jogo com transmissão corresponde a "${query}".`
-              : "Nenhum jogo com transmissão confirmada para este dia."}
-          </p>
-        )}
-      </section>
-
-      {showTomorrowFallback && (
-        <section className="max-w-5xl mx-auto px-6 pb-8">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-base-content">{titles.tomorrow}</h2>
-            <p className="text-xs text-base-content/40 mt-0.5">{getDateLabel("tomorrow")}</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {tomorrowWithBroadcast.map((game) => (
-              <GameCard
-                key={game.id}
-                game={getGameWithLocalVotes(game)}
-                isLoggedIn={isLoggedIn}
-                userId={userId}
-                isAdmin={isAdmin}
-                onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
-                onVoteSettled={() => clearLocalVotes(game.id)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      <section className="max-w-5xl mx-auto px-6 pb-12">
-        <h2 className="text-lg font-semibold text-base-content mb-4">Outros jogos do dia</h2>
-        {withoutBroadcast.length > 0 ? (
           <div className="flex flex-col gap-6">
-            {Object.entries(groupedByLeague).map(([league, leagueGames]) => (
+            {Object.entries(groupByLeague(withBroadcast)).map(([league, leagueGames]) => (
               <div key={league}>
-                <h3 className="text-xs font-semibold text-base-content/40 uppercase tracking-wider mb-1 px-3">
+                <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
                   {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
                 </h3>
                 <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
@@ -211,7 +163,72 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
             ))}
           </div>
         ) : (
-          <p className="text-sm text-base-content/40">
+          <p className="text-sm text-base-content/60">
+            {query.trim()
+              ? `Nenhum jogo com transmissão corresponde a "${query}".`
+              : "Nenhum jogo com transmissão confirmada para este dia."}
+          </p>
+        )}
+      </section>
+
+      {showTomorrowFallback && (
+        <section className="max-w-5xl mx-auto px-6 pb-8">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-base-content">{titles.tomorrow}</h2>
+            <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel("tomorrow")}</p>
+          </div>
+          <div className="flex flex-col gap-6">
+            {Object.entries(groupByLeague(tomorrowWithBroadcast)).map(([league, leagueGames]) => (
+              <div key={league}>
+                <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
+                  {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
+                </h3>
+                <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
+                  {leagueGames.map((game) => (
+                    <GameRow
+                      key={game.id}
+                      game={getGameWithLocalVotes(game)}
+                      isLoggedIn={isLoggedIn}
+                      userId={userId}
+                      isAdmin={isAdmin}
+                      onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
+                      onVoteSettled={() => clearLocalVotes(game.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="max-w-5xl mx-auto px-6 pb-12">
+        <h2 className="text-lg font-semibold text-base-content mb-4">Outros jogos do dia</h2>
+        {withoutBroadcast.length > 0 ? (
+          <div className="flex flex-col gap-6">
+            {Object.entries(groupedByLeague).map(([league, leagueGames]) => (
+              <div key={league}>
+                <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
+                  {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
+                </h3>
+                <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
+                  {leagueGames.map((game) => (
+                    <GameRow
+                      key={game.id}
+                      game={getGameWithLocalVotes(game)}
+                      isLoggedIn={isLoggedIn}
+                      userId={userId}
+                      isAdmin={isAdmin}
+                      onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
+                      onVoteSettled={() => clearLocalVotes(game.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-base-content/60">
             {query.trim() ? `Nenhum outro jogo corresponde a "${query}".` : "Nenhum outro jogo registrado para este dia."}
           </p>
         )}
