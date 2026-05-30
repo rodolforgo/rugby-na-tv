@@ -39,6 +39,7 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
   }
 
   const hasOfficialChannels = game.channels.length > 0;
+  const isEventGame = game.homeTeamName === "" && game.awayTeamName === "";
   const votedChannels = game.allChannels.filter((c) => c.upvoteCount > 0 || c.downvoteCount > 0);
 
   return (
@@ -47,22 +48,28 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
         <div className="flex items-center gap-3">
           <span className="w-10 shrink-0 text-xs text-base-content/70">{formatTime(new Date(game.date))}</span>
 
-          <div className="flex-1 min-w-0 flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <TeamLogo name={game.homeTeamName} logo={game.homeTeamLogo} size="sm" />
-              <span className="text-base-content font-medium truncate">{game.homeTeamName}</span>
-              {game.scoresHome !== null && (
-                <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresHome}</span>
-              )}
+          {isEventGame ? (
+            <div className="flex-1 min-w-0 flex items-center justify-center">
+              <span className="text-base-content font-medium truncate">{game.leagueName}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <TeamLogo name={game.awayTeamName} logo={game.awayTeamLogo} size="sm" />
-              <span className="text-base-content font-medium truncate">{game.awayTeamName}</span>
-              {game.scoresAway !== null && (
-                <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresAway}</span>
-              )}
+          ) : (
+            <div className="flex-1 min-w-0 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <TeamLogo name={game.homeTeamName} logo={game.homeTeamLogo} size="sm" />
+                <span className="text-base-content font-medium truncate">{game.homeTeamName}</span>
+                {game.scoresHome !== null && (
+                  <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresHome}</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <TeamLogo name={game.awayTeamName} logo={game.awayTeamLogo} size="sm" />
+                <span className="text-base-content font-medium truncate">{game.awayTeamName}</span>
+                {game.scoresAway !== null && (
+                  <span className="text-sm font-bold text-base-content/85 tabular-nums shrink-0">{game.scoresAway}</span>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex items-center gap-2 shrink-0">
             {isCommunityGame && <span className="badge badge-warning badge-xs">Comunidade</span>}
