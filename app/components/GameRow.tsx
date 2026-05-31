@@ -49,7 +49,7 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
           <span className="w-10 shrink-0 text-xs text-base-content/70">{formatTime(new Date(game.date))}</span>
 
           {isEventGame ? (
-            <div className="flex-1 min-w-0 flex items-center justify-center">
+            <div className="flex-1 min-w-0 flex items-center">
               <span className="text-base-content font-medium truncate">{game.leagueName}</span>
             </div>
           ) : (
