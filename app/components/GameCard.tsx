@@ -51,7 +51,7 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
         <div className="card-body p-4 gap-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs text-base-content/50 truncate">{game.leagueName}</span>
+              <span className="text-xs text-base-content/65 truncate">{game.leagueName}</span>
               {isCommunityGame && <span className="badge badge-warning badge-xs shrink-0">Comunidade</span>}
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -60,12 +60,12 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
                   type="button"
                   onClick={() => setShowConfirm(true)}
                   title="Deletar jogo"
-                  className="text-base-content/30 hover:text-error transition-colors cursor-pointer"
+                  className="text-base-content/50 hover:text-error transition-colors cursor-pointer"
                 >
                   <TrashIcon className="w-3.5 h-3.5" />
                 </button>
               )}
-              <span className="text-xs font-bold text-base-content/60">{formatTime(new Date(game.date))}</span>
+              <span className="text-xs font-bold text-base-content/75">{formatTime(new Date(game.date))}</span>
             </div>
           </div>
 
@@ -80,7 +80,7 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
                 {game.scoresHome} – {game.scoresAway}
               </span>
             ) : (
-              <span className="text-sm text-base-content/30 shrink-0">×</span>
+              <span className="text-sm text-base-content/50 shrink-0">×</span>
             )}
 
             <div className="flex flex-col items-center gap-1 flex-1">
@@ -89,7 +89,7 @@ export default function GameCard({ game, isLoggedIn, userId, isAdmin, onVote, on
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-base-200">
+          <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-base-300">
             {officialChannels.map((channel) => (
               <div key={channel.id} className="flex items-center gap-1 badge badge-soft badge-primary text-xs">
                 {channel.name}
@@ -143,8 +143,8 @@ type ChannelVoteBadgeProps = {
 
 function ChannelVoteBadge({ channel, onVote, variant, isPending }: ChannelVoteBadgeProps) {
   const baseColor = variant === "primary" ? "badge-primary" : "badge-success";
-  const upColor = channel.userVote === "upvote" ? "text-success" : "text-base-content/40 hover:text-success";
-  const downColor = channel.userVote === "downvote" ? "text-error" : "text-base-content/40 hover:text-error";
+  const upColor = channel.userVote === "upvote" ? "text-success" : "text-base-content/60 hover:text-success";
+  const downColor = channel.userVote === "downvote" ? "text-error" : "text-base-content/60 hover:text-error";
 
   return (
     <div className={`flex items-center gap-1 badge badge-soft ${baseColor} text-xs pr-0 overflow-hidden`}>
