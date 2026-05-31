@@ -44,7 +44,7 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
 
   return (
     <>
-      <div className={`py-2 px-3 text-sm${hasOfficialChannels ? " bg-base-200" : ""}`}>
+      <div className={`py-2 px-3 text-sm min-h-[72px] flex flex-col justify-center${hasOfficialChannels ? " bg-base-200" : ""}`}>
         <div className="flex items-center gap-3">
           <span className="w-10 shrink-0 text-xs text-base-content/70">{formatTime(new Date(game.date))}</span>
 
