@@ -99,8 +99,14 @@ async function syncByDate(date: string) {
 
 async function listForDisplay(): Promise<GameWithChannels[]> {
   const today = new Date();
-  const start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - 1));
-  const end = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 2, 3, 0, 0));
+  const brDateStr = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(today);
+  const brMidnight = new Date(`${brDateStr}T03:00:00Z`);
+
+  const start = new Date(brMidnight);
+  start.setUTCDate(start.getUTCDate() - 1);
+
+  const end = new Date(brMidnight);
+  end.setUTCDate(end.getUTCDate() + 2);
 
   const rows = await db.query.gamesSchema.findMany({
     where: (g, { and, gte, lt }) => and(gte(g.date, start), lt(g.date, end)),
