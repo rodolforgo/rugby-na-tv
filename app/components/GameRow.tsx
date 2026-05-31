@@ -86,7 +86,7 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
             {hasOfficialChannels ? (
               <div className="flex flex-wrap gap-1 justify-end">
                 {game.channels.map((channel) => (
-                  <span key={channel.id} className="badge badge-soft badge-primary text-sm">
+                  <span key={channel.id} className="badge badge-primary badge-xs">
                     {channel.name}
                   </span>
                 ))}
