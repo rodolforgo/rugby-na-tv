@@ -258,14 +258,11 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
 
 type LeagueHeaderProps = { league: string; countryName: string; countryFlag: string | null; count: number };
 
-function LeagueHeader({ league, countryName, countryFlag, count }: LeagueHeaderProps) {
+function LeagueHeader({ league, countryName, countryFlag }: LeagueHeaderProps) {
   return (
     <span className="flex items-center gap-1.5">
       {countryFlag ? <img src={countryFlag} alt={countryName} className="w-4 h-3 object-cover rounded-sm shrink-0" /> : null}
-      <span>{countryName ? `${countryName} · ${league}` : league}</span>
-      <span className="font-normal normal-case tracking-normal opacity-70">
-        · {count} {count === 1 ? "jogo" : "jogos"}
-      </span>
+      <span>{league}</span>
     </span>
   );
 }
