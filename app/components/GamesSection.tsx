@@ -17,14 +17,16 @@ type Props = { games: GameWithVotes[]; isLoggedIn: boolean; userId?: string; can
 
 type LocalVotes = Record<string, Record<string, { upvoteCount: number; downvoteCount: number; userVote: "upvote" | "downvote" | null }>>;
 
-function groupByLeague(games: GameWithVotes[]): Record<string, GameWithVotes[]> {
+type LeagueGroup = { games: GameWithVotes[]; countryName: string; countryFlag: string | null };
+
+function groupByLeague(games: GameWithVotes[]): Record<string, LeagueGroup> {
   return games.reduce(
     (acc, game) => {
-      if (!acc[game.leagueName]) acc[game.leagueName] = [];
-      acc[game.leagueName].push(game);
+      if (!acc[game.leagueName]) acc[game.leagueName] = { games: [], countryName: game.countryName, countryFlag: game.countryFlag };
+      acc[game.leagueName].games.push(game);
       return acc;
     },
-    {} as Record<string, GameWithVotes[]>,
+    {} as Record<string, LeagueGroup>,
   );
 }
 
@@ -141,13 +143,18 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
         </div>
         {withBroadcast.length > 0 ? (
           <div className="flex flex-col gap-6">
-            {Object.entries(groupByLeague(withBroadcast)).map(([league, leagueGames]) => (
+            {Object.entries(groupByLeague(withBroadcast)).map(([league, group]) => (
               <div key={league}>
                 <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
-                  {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
+                  <LeagueHeader
+                    league={league}
+                    countryName={group.countryName}
+                    countryFlag={group.countryFlag}
+                    count={group.games.length}
+                  />
                 </h3>
                 <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
-                  {leagueGames.map((game) => (
+                  {group.games.map((game) => (
                     <GameRow
                       key={game.id}
                       game={getGameWithLocalVotes(game)}
@@ -178,13 +185,18 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
             <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel("tomorrow")}</p>
           </div>
           <div className="flex flex-col gap-6">
-            {Object.entries(groupByLeague(tomorrowWithBroadcast)).map(([league, leagueGames]) => (
+            {Object.entries(groupByLeague(tomorrowWithBroadcast)).map(([league, group]) => (
               <div key={league}>
                 <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
-                  {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
+                  <LeagueHeader
+                    league={league}
+                    countryName={group.countryName}
+                    countryFlag={group.countryFlag}
+                    count={group.games.length}
+                  />
                 </h3>
                 <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
-                  {leagueGames.map((game) => (
+                  {group.games.map((game) => (
                     <GameRow
                       key={game.id}
                       game={getGameWithLocalVotes(game)}
@@ -206,13 +218,18 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
         <h2 className="text-lg font-semibold text-base-content mb-4">Outros jogos do dia</h2>
         {withoutBroadcast.length > 0 ? (
           <div className="flex flex-col gap-6">
-            {Object.entries(groupedByLeague).map(([league, leagueGames]) => (
+            {Object.entries(groupedByLeague).map(([league, group]) => (
               <div key={league}>
                 <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
-                  {league} · {leagueGames.length} {leagueGames.length === 1 ? "jogo" : "jogos"}
+                  <LeagueHeader
+                    league={league}
+                    countryName={group.countryName}
+                    countryFlag={group.countryFlag}
+                    count={group.games.length}
+                  />
                 </h3>
                 <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
-                  {leagueGames.map((game) => (
+                  {group.games.map((game) => (
                     <GameRow
                       key={game.id}
                       game={getGameWithLocalVotes(game)}
@@ -236,5 +253,16 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
 
       {showCreateModal && <CreateGameModal onClose={() => setShowCreateModal(false)} />}
     </>
+  );
+}
+
+type LeagueHeaderProps = { league: string; countryName: string; countryFlag: string | null; count: number };
+
+function LeagueHeader({ league, countryName, countryFlag }: LeagueHeaderProps) {
+  return (
+    <span className="flex items-center gap-1.5">
+      {countryFlag ? <img src={countryFlag} alt={countryName} className="w-4 h-3 object-cover rounded-sm shrink-0" /> : null}
+      <span>{league}</span>
+    </span>
   );
 }
