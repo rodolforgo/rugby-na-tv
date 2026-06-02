@@ -31,6 +31,7 @@ export type GameWithChannels = {
   date: Date;
   leagueName: string;
   countryName: string;
+  countryFlag: string | null;
   homeTeamName: string;
   homeTeamLogo: string | null;
   awayTeamName: string;

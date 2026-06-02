@@ -349,7 +349,7 @@ describe("games.createUserGame()", () => {
       homeTeamName: "Time A",
       awayTeamName: "Time B",
       leagueName: "Liga Teste",
-      date: "2026-06-01",
+      date: "2026-06-10",
       time: "15:00",
       channelName: "Canal Teste",
     });
@@ -358,7 +358,7 @@ describe("games.createUserGame()", () => {
     expect(game.awayTeamName).toBe("Time B");
     expect(game.leagueName).toBe("Liga Teste");
     expect(game.createdByUserId).toBe(user.id);
-    expect(game.date).toEqual(new Date("2026-06-01T18:00:00Z"));
+    expect(game.date).toEqual(new Date("2026-06-10T18:00:00Z"));
   });
 
   test("Canal criado é vinculado ao jogo com voteable false", async () => {
@@ -368,7 +368,7 @@ describe("games.createUserGame()", () => {
       homeTeamName: "Time A",
       awayTeamName: "Time B",
       leagueName: "Liga Teste",
-      date: "2026-06-01",
+      date: "2026-06-10",
       time: "15:00",
       channelName: "Canal Exclusivo",
     });
@@ -387,7 +387,7 @@ describe("games.createUserGame()", () => {
         homeTeamName: "Time A",
         awayTeamName: "Time B",
         leagueName: "Liga",
-        date: "2026-06-01",
+        date: "2026-06-10",
         time: "15:00",
         channelName: "Canal",
       }),
@@ -408,7 +408,7 @@ describe("games.deleteUserGame()", () => {
       homeTeamName: "Time A",
       awayTeamName: "Time B",
       leagueName: "Liga",
-      date: "2026-06-01",
+      date: "2026-06-10",
       time: "15:00",
       channelName: "Canal",
     });
@@ -428,7 +428,7 @@ describe("games.deleteUserGame()", () => {
       homeTeamName: "Time A",
       awayTeamName: "Time B",
       leagueName: "Liga",
-      date: "2026-06-01",
+      date: "2026-06-10",
       time: "15:00",
       channelName: "Canal",
     });
@@ -447,7 +447,7 @@ describe("games.deleteUserGame()", () => {
       homeTeamName: "Time A",
       awayTeamName: "Time B",
       leagueName: "Liga",
-      date: "2026-06-01",
+      date: "2026-06-10",
       time: "15:00",
       channelName: "Canal",
     });
@@ -486,7 +486,7 @@ describe("games.listByUser()", () => {
       homeTeamName: "Time A",
       awayTeamName: "Time B",
       leagueName: "Liga",
-      date: "2026-06-01",
+      date: "2026-06-10",
       time: "15:00",
       channelName: "Canal A",
     });
@@ -495,7 +495,7 @@ describe("games.listByUser()", () => {
       homeTeamName: "Time C",
       awayTeamName: "Time D",
       leagueName: "Liga",
-      date: "2026-06-02",
+      date: "2026-06-11",
       time: "16:00",
       channelName: "Canal B",
     });
@@ -520,7 +520,7 @@ describe("games.listByUser()", () => {
       homeTeamName: "Time A",
       awayTeamName: "Time B",
       leagueName: "Liga",
-      date: "2026-06-01",
+      date: "2026-06-10",
       time: "15:00",
       channelName: "Meu Canal",
     });
