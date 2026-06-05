@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import DateSelector, { type DateOption } from "./DateSelector";
 import GameRow from "./GameRow";
@@ -269,7 +270,9 @@ type LeagueHeaderProps = { league: string; countryName: string; countryFlag: str
 function LeagueHeader({ league, countryName, countryFlag }: LeagueHeaderProps) {
   return (
     <span className="flex items-center gap-1.5">
-      {countryFlag ? <img src={countryFlag} alt={countryName} className="w-4 h-3 object-cover rounded-sm shrink-0" /> : null}
+      {countryFlag ? (
+        <Image src={countryFlag} alt={countryName} width={16} height={12} className="object-cover rounded-sm shrink-0" />
+      ) : null}
       <span>{league}</span>
     </span>
   );
