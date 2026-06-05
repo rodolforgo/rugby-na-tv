@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import DateSelector, { type DateOption } from "./DateSelector";
 import GameRow from "./GameRow";
@@ -76,11 +77,20 @@ function matchesQuery(game: GameWithVotes, query: string): boolean {
   );
 }
 
-export default function GamesSection({ games, isLoggedIn, userId, canCreateGame, isAdmin }: Props) {
+export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Props) {
+  const router = useRouter();
   const [selected, setSelected] = useState<DateOption>("today");
   const [localVotes, setLocalVotes] = useState<LocalVotes>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { query } = useFilter();
+
+  function handleAddGame() {
+    if (!isLoggedIn) {
+      router.push("/?modal=login");
+      return;
+    }
+    setShowCreateModal(true);
+  }
 
   function clearLocalVotes(gameId: string) {
     setLocalVotes((prev) => {
@@ -133,11 +143,9 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
             <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel(selected)}</p>
           </div>
           <div className="flex items-center gap-2">
-            {canCreateGame && (
-              <button type="button" onClick={() => setShowCreateModal(true)} className="btn btn-primary btn-sm">
-                + Adicionar jogo
-              </button>
-            )}
+            <button type="button" onClick={handleAddGame} className="btn btn-primary btn-sm">
+              + Adicionar jogo
+            </button>
             <DateSelector selected={selected} onChange={setSelected} />
           </div>
         </div>
