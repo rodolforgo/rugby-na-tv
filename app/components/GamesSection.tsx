@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { ChannelWithVotes, GameWithVotes } from "@/domain/games/games.types";
 import DateSelector, { type DateOption } from "./DateSelector";
 import GameRow from "./GameRow";
@@ -76,11 +78,20 @@ function matchesQuery(game: GameWithVotes, query: string): boolean {
   );
 }
 
-export default function GamesSection({ games, isLoggedIn, userId, canCreateGame, isAdmin }: Props) {
+export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Props) {
+  const router = useRouter();
   const [selected, setSelected] = useState<DateOption>("today");
   const [localVotes, setLocalVotes] = useState<LocalVotes>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const { query } = useFilter();
+
+  function handleAddGame() {
+    if (!isLoggedIn) {
+      router.push("/?modal=login");
+      return;
+    }
+    setShowCreateModal(true);
+  }
 
   function clearLocalVotes(gameId: string) {
     setLocalVotes((prev) => {
@@ -133,11 +144,9 @@ export default function GamesSection({ games, isLoggedIn, userId, canCreateGame,
             <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel(selected)}</p>
           </div>
           <div className="flex items-center gap-2">
-            {canCreateGame && (
-              <button type="button" onClick={() => setShowCreateModal(true)} className="btn btn-primary btn-sm">
-                + Adicionar jogo
-              </button>
-            )}
+            <button type="button" onClick={handleAddGame} className="btn btn-primary btn-sm">
+              + Adicionar jogo
+            </button>
             <DateSelector selected={selected} onChange={setSelected} />
           </div>
         </div>
@@ -261,7 +270,9 @@ type LeagueHeaderProps = { league: string; countryName: string; countryFlag: str
 function LeagueHeader({ league, countryName, countryFlag }: LeagueHeaderProps) {
   return (
     <span className="flex items-center gap-1.5">
-      {countryFlag ? <img src={countryFlag} alt={countryName} className="w-4 h-3 object-cover rounded-sm shrink-0" /> : null}
+      {countryFlag ? (
+        <Image src={countryFlag} alt={countryName} width={16} height={12} className="object-cover rounded-sm shrink-0" />
+      ) : null}
       <span>{league}</span>
     </span>
   );
