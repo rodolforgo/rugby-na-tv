@@ -39,12 +39,13 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
   }
 
   const hasOfficialChannels = game.channels.length > 0;
+  const hasCommunityBroadcast = game.allChannels.some((c) => c.upvoteCount > c.downvoteCount);
   const isEventGame = game.homeTeamName === "" && game.awayTeamName === "";
   const votedChannels = game.allChannels.filter((c) => c.upvoteCount > 0 || c.downvoteCount > 0);
 
   return (
     <>
-      <div className={`py-2 px-3 text-sm min-h-[72px] flex flex-col justify-center${hasOfficialChannels ? " bg-base-200" : ""}`}>
+      <div className={`py-2 px-3 text-sm min-h-[72px] flex flex-col justify-center${hasOfficialChannels || hasCommunityBroadcast ? " bg-base-200" : ""}`}>
         <div className="flex items-center gap-3">
           <span className="w-10 shrink-0 text-xs text-base-content/70">{formatTime(new Date(game.date))}</span>
 
