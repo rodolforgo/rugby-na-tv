@@ -16,7 +16,7 @@ const siteDescription =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${siteName} — Onde assistir rugby no Brasil`,
+    default: `${siteName} - Onde assistir rugby no Brasil`,
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
@@ -48,12 +48,12 @@ export const metadata: Metadata = {
     locale: "pt_BR",
     url: siteUrl,
     siteName,
-    title: `${siteName} — Onde assistir rugby no Brasil`,
+    title: `${siteName} - Onde assistir rugby no Brasil`,
     description: siteDescription,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteName} — Onde assistir rugby no Brasil`,
+    title: `${siteName} - Onde assistir rugby no Brasil`,
     description: siteDescription,
   },
 };
