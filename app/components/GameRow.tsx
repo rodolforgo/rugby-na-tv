@@ -74,27 +74,36 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
             </div>
           )}
 
-          <div className="flex items-center gap-2 shrink-0">
-            {isCommunityGame && <span className="badge badge-warning badge-xs">Comunidade</span>}
-            {canDelete && (
-              <button
-                type="button"
-                onClick={() => setShowConfirm(true)}
-                title="Deletar jogo"
-                className="text-base-content/50 hover:text-error transition-colors cursor-pointer"
-              >
-                <TrashIcon className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {hasOfficialChannels ? (
-              <div className="flex flex-wrap gap-1 justify-end">
-                {game.channels.map((channel) => (
-                  <span key={channel.id} className="badge badge-primary badge-xs">
-                    {channel.name}
-                  </span>
-                ))}
-              </div>
-            ) : (
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <div className="flex items-center gap-2">
+              {isCommunityGame && <span className="badge badge-warning badge-xs">Comunidade</span>}
+              {canDelete && (
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  title="Deletar jogo"
+                  className="text-base-content/50 hover:text-error transition-colors cursor-pointer"
+                >
+                  <TrashIcon className="w-3.5 h-3.5" />
+                </button>
+              )}
+              {hasOfficialChannels ? (
+                <div className="flex flex-wrap gap-1 justify-end">
+                  {game.channels.map((channel) => (
+                    <span key={channel.id} className="badge badge-primary badge-xs">
+                      {channel.name}
+                    </span>
+                  ))}
+                </div>
+              ) : votedChannels.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5 justify-end">
+                  {votedChannels.map((channel) => (
+                    <ChannelPill key={channel.id} channel={channel} onVote={vote} isPending={isPending} />
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            {!hasOfficialChannels && (
               <button
                 type="button"
                 onClick={openModal}
@@ -106,14 +115,6 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
             )}
           </div>
         </div>
-
-        {!hasOfficialChannels && votedChannels.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-2 ml-14">
-            {votedChannels.map((channel) => (
-              <ChannelPill key={channel.id} channel={channel} onVote={vote} isPending={isPending} />
-            ))}
-          </div>
-        )}
       </div>
 
       <SuggestChannelModal
