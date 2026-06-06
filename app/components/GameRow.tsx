@@ -146,8 +146,8 @@ type ChannelPillProps = {
 
 function ChannelPill({ channel, onVote, isPending }: ChannelPillProps) {
   return (
-    <div className="flex items-stretch rounded-lg border border-base-300 overflow-hidden text-xs">
-      <span className="px-2 py-1 bg-primary text-primary-content border-r border-primary/70 text-[0.625rem]">{channel.name}</span>
+    <div className="flex items-stretch rounded-lg border border-base-300 overflow-hidden text-[0.625rem]">
+      <span className="px-2 py-1 bg-primary text-primary-content border-r border-primary/70">{channel.name}</span>
       <button
         type="button"
         disabled={isPending}
