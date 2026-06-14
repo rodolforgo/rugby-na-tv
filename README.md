@@ -35,6 +35,8 @@ Plataforma colaborativa e open-source para centralizar transmissões de rugby no
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | GET | `/api/v1/games` | Lista jogos com canais e votos |
+| POST | `/api/v1/games` | Cria jogo manualmente (requer feature `create:user_game`) |
+| DELETE | `/api/v1/games/:id` | Remove jogo criado pelo usuário (requer sessão) |
 | POST | `/api/v1/games/api-sports` | Sincroniza jogos da API Sports (requer `SYNC_SECRET`) |
 | GET | `/api/v1/games/ronin-api` | Sincroniza transmissões da Ronin Media API (requer `SYNC_SECRET`) |
 | POST | `/api/v1/games/:id/votes` | Registra ou atualiza voto em um canal |
