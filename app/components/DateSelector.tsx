@@ -15,13 +15,13 @@ const options: { value: DateOption; label: string }[] = [
 
 export default function DateSelector({ selected, onChange }: Props) {
   return (
-    <div role="tablist" className="tabs tabs-box w-fit">
+    <div role="tablist" className="tabs tabs-box w-fit flex-nowrap shrink-0">
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
           role="tab"
-          className={`tab ${selected === option.value ? "tab-active" : ""}`}
+          className={`tab whitespace-nowrap ${selected === option.value ? "tab-active" : ""}`}
           onClick={() => onChange(option.value)}
         >
           {option.label}

@@ -143,7 +143,7 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
             <h2 className="text-lg font-semibold text-base-content">{titles[selected]}</h2>
             <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel(selected)}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-nowrap shrink-0">
             <button type="button" onClick={handleAddGame} className="btn btn-primary btn-sm">
               + Adicionar jogo
             </button>
