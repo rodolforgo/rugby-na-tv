@@ -184,9 +184,7 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
         <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
           <div>
             <div className="text-[12px] tracking-[0.16em] uppercase text-primary mb-2.5">{getDateLabel(selected)}</div>
-            <h1 className="m-0 font-extrabold text-[clamp(20px,3vw,27px)] leading-tight tracking-[-0.025em]">
-              {titles[selected]}
-            </h1>
+            <h1 className="m-0 font-extrabold text-[clamp(20px,3vw,27px)] leading-tight tracking-[-0.025em]">{titles[selected]}</h1>
           </div>
           <div className="flex items-center gap-2 flex-nowrap shrink-0">
             <button

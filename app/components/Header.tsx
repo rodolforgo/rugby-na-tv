@@ -25,9 +25,7 @@ export default async function Header() {
             <span className="font-black text-[clamp(18px,2.6vw,24px)] tracking-[-0.03em] leading-none uppercase">
               Rugby na <span className="text-primary">TV</span>
             </span>
-            <span className="text-[10px] tracking-[0.14em] uppercase text-base-content/50 mt-1">
-              Onde assistir no Brasil
-            </span>
+            <span className="text-[10px] tracking-[0.14em] uppercase text-base-content/50 mt-1">Onde assistir no Brasil</span>
           </a>
 
           <div className="flex-1 hidden lg:flex justify-center">
