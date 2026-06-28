@@ -226,10 +226,12 @@ function scoreMatch(broadcast: Broadcast, game: { homeTeamName: string; awayTeam
   if (teamMatch(broadcast.visitingTeam, game.awayTeamName)) score++;
   if (partial(broadcast.league, game.leagueName) || tokenMatch(broadcast.league, game.leagueName)) score++;
 
-  const broadcastTime = broadcast.date.slice(11, 16);
+  const bDate = new Date(broadcast.date);
+  const broadcastHour = bDate.getUTCHours().toString().padStart(2, "0");
+  const broadcastMinute = bDate.getUTCMinutes().toString().padStart(2, "0");
   const dbHour = game.date.getUTCHours().toString().padStart(2, "0");
   const dbMinute = game.date.getUTCMinutes().toString().padStart(2, "0");
-  if (broadcastTime === `${dbHour}:${dbMinute}`) score++;
+  if (`${broadcastHour}:${broadcastMinute}` === `${dbHour}:${dbMinute}`) score++;
 
   return score;
 }
