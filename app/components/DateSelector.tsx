@@ -15,14 +15,18 @@ const options: { value: DateOption; label: string }[] = [
 
 export default function DateSelector({ selected, onChange }: Props) {
   return (
-    <div role="tablist" className="tabs tabs-box w-fit flex-nowrap shrink-0">
+    <div role="tablist" className="flex gap-2 flex-nowrap shrink-0">
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
           role="tab"
-          className={`tab whitespace-nowrap ${selected === option.value ? "tab-active" : ""}`}
           onClick={() => onChange(option.value)}
+          className={`text-[12px] tracking-[0.08em] uppercase font-bold rounded-full px-5 py-2 border-[1.5px] whitespace-nowrap transition-colors ${
+            selected === option.value
+              ? "bg-primary text-white border-primary"
+              : "bg-white text-base-content/50 border-base-300 hover:border-base-content/30 hover:text-base-content/70"
+          }`}
         >
           {option.label}
         </button>

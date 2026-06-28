@@ -78,6 +78,54 @@ function matchesQuery(game: GameWithVotes, query: string): boolean {
   );
 }
 
+function GameList({
+  games,
+  isLoggedIn,
+  userId,
+  isAdmin,
+  localVotes,
+  onVote,
+  onVoteSettled,
+}: {
+  games: GameWithVotes[];
+  isLoggedIn: boolean;
+  userId?: string;
+  isAdmin?: boolean;
+  localVotes: LocalVotes;
+  onVote: (gameId: string, channelId: string, voteType: "upvote" | "downvote") => void;
+  onVoteSettled: (gameId: string) => void;
+}) {
+  const grouped = groupByLeague(games);
+  return (
+    <>
+      {Object.entries(grouped).map(([league, group]) => (
+        <div key={league}>
+          <div className="flex items-center gap-1.5 pt-5 pb-1 px-1">
+            {group.countryFlag ? (
+              <Image src={group.countryFlag} alt={group.countryName} width={14} height={10} className="object-cover rounded-sm shrink-0" />
+            ) : null}
+            <span className="text-[10px] tracking-[0.14em] uppercase text-base-content/40 font-semibold">{league}</span>
+          </div>
+          {group.games.map((game) => {
+            const merged = { ...game, allChannels: mergeChannels(game, localVotes) };
+            return (
+              <GameRow
+                key={game.id}
+                game={merged}
+                isLoggedIn={isLoggedIn}
+                userId={userId}
+                isAdmin={isAdmin}
+                onVote={(channelId, voteType) => onVote(game.id, channelId, voteType)}
+                onVoteSettled={() => onVoteSettled(game.id)}
+              />
+            );
+          })}
+        </div>
+      ))}
+    </>
+  );
+}
+
 export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<DateOption>("today");
@@ -119,15 +167,10 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
     });
   }
 
-  function getGameWithLocalVotes(game: GameWithVotes): GameWithVotes {
-    return { ...game, allChannels: mergeChannels(game, localVotes) };
-  }
-
   const targetDate = getTargetDateString(selected);
   const gamesForDay = games.filter((g) => getSpDateString(new Date(g.date)) === targetDate && matchesQuery(g, query));
   const withBroadcast = gamesForDay.filter((g) => hasBroadcast(g, localVotes));
   const withoutBroadcast = gamesForDay.filter((g) => !hasBroadcast(g, localVotes));
-  const groupedByLeague = groupByLeague(withoutBroadcast);
 
   const tomorrowWithBroadcast =
     selected === "today" && withBroadcast.length === 0
@@ -137,124 +180,93 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
 
   return (
     <>
-      <section className="max-w-5xl mx-auto px-6 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+      <section className="max-w-5xl mx-auto px-6 pt-10 pb-8">
+        <div className="flex items-end justify-between gap-6 flex-wrap mb-8">
           <div>
-            <h2 className="text-lg font-semibold text-base-content">{titles[selected]}</h2>
-            <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel(selected)}</p>
+            <div className="text-[12px] tracking-[0.16em] uppercase text-primary mb-2.5">{getDateLabel(selected)}</div>
+            <h1 className="m-0 font-extrabold text-[clamp(20px,3vw,27px)] leading-tight tracking-[-0.025em]">{titles[selected]}</h1>
           </div>
           <div className="flex items-center gap-2 flex-nowrap shrink-0">
-            <button type="button" onClick={handleAddGame} className="btn btn-primary btn-sm">
+            <button
+              type="button"
+              onClick={handleAddGame}
+              className="text-[11.5px] tracking-[0.08em] uppercase font-bold text-primary hover:text-primary/70 transition-colors"
+            >
               + Adicionar jogo
             </button>
             <DateSelector selected={selected} onChange={setSelected} />
           </div>
         </div>
+
         {withBroadcast.length > 0 ? (
-          <div className="flex flex-col gap-6">
-            {Object.entries(groupByLeague(withBroadcast)).map(([league, group]) => (
-              <div key={league}>
-                <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
-                  <LeagueHeader
-                    league={league}
-                    countryName={group.countryName}
-                    countryFlag={group.countryFlag}
-                    count={group.games.length}
-                  />
-                </h3>
-                <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
-                  {group.games.map((game) => (
-                    <GameRow
-                      key={game.id}
-                      game={getGameWithLocalVotes(game)}
-                      isLoggedIn={isLoggedIn}
-                      userId={userId}
-                      isAdmin={isAdmin}
-                      onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
-                      onVoteSettled={() => clearLocalVotes(game.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="border-t-2 border-base-content">
+            <GameList
+              games={withBroadcast}
+              isLoggedIn={isLoggedIn}
+              userId={userId}
+              isAdmin={isAdmin}
+              localVotes={localVotes}
+              onVote={handleVote}
+              onVoteSettled={clearLocalVotes}
+            />
           </div>
         ) : (
-          <p className="text-sm text-base-content/60">
-            {query.trim()
-              ? `Nenhum jogo com transmissão corresponde a "${query}".`
-              : "Nenhum jogo com transmissão confirmada para este dia."}
-          </p>
+          <div className="border border-dashed border-base-300 rounded-md px-6 py-12 text-center">
+            <p className="font-bold text-lg tracking-tight mb-2">
+              {query.trim() ? `Nenhum jogo com transmissão corresponde a "${query}".` : "Nenhuma transmissão confirmada para este dia."}
+            </p>
+            {!query.trim() && (
+              <p className="text-[12px] tracking-[0.04em] text-base-content/50">
+                Sabe de algum jogo? Ajude indicando a transmissão abaixo.
+              </p>
+            )}
+          </div>
         )}
       </section>
 
       {showTomorrowFallback && (
         <section className="max-w-5xl mx-auto px-6 pb-8">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-base-content">{titles.tomorrow}</h2>
-            <p className="text-xs text-base-content/60 mt-0.5">{getDateLabel("tomorrow")}</p>
+            <div className="text-[12px] tracking-[0.16em] uppercase text-primary mb-2.5">{getDateLabel("tomorrow")}</div>
+            <h2 className="font-extrabold text-[clamp(22px,4vw,36px)] leading-tight tracking-[-0.025em]">{titles.tomorrow}</h2>
           </div>
-          <div className="flex flex-col gap-6">
-            {Object.entries(groupByLeague(tomorrowWithBroadcast)).map(([league, group]) => (
-              <div key={league}>
-                <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
-                  <LeagueHeader
-                    league={league}
-                    countryName={group.countryName}
-                    countryFlag={group.countryFlag}
-                    count={group.games.length}
-                  />
-                </h3>
-                <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
-                  {group.games.map((game) => (
-                    <GameRow
-                      key={game.id}
-                      game={getGameWithLocalVotes(game)}
-                      isLoggedIn={isLoggedIn}
-                      userId={userId}
-                      isAdmin={isAdmin}
-                      onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
-                      onVoteSettled={() => clearLocalVotes(game.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
+          <div className="border-t-2 border-base-content">
+            <GameList
+              games={tomorrowWithBroadcast}
+              isLoggedIn={isLoggedIn}
+              userId={userId}
+              isAdmin={isAdmin}
+              localVotes={localVotes}
+              onVote={handleVote}
+              onVoteSettled={clearLocalVotes}
+            />
           </div>
         </section>
       )}
 
-      <section className="max-w-5xl mx-auto px-6 pb-12">
-        <h2 className="text-lg font-semibold text-base-content mb-4">Outros jogos do dia</h2>
+      <section className="max-w-5xl mx-auto px-6 pb-16">
+        <div className="flex items-center justify-between gap-4 flex-wrap border-b-2 border-base-content pb-3">
+          <h2 className="font-extrabold text-[clamp(20px,3vw,27px)] tracking-[-0.025em]">Outros jogos do dia</h2>
+          <button
+            type="button"
+            onClick={handleAddGame}
+            className="text-[11.5px] tracking-[0.08em] uppercase font-bold text-primary hover:text-primary/70 transition-colors"
+          >
+            + Adicionar jogo
+          </button>
+        </div>
         {withoutBroadcast.length > 0 ? (
-          <div className="flex flex-col gap-6">
-            {Object.entries(groupedByLeague).map(([league, group]) => (
-              <div key={league}>
-                <h3 className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1 px-3">
-                  <LeagueHeader
-                    league={league}
-                    countryName={group.countryName}
-                    countryFlag={group.countryFlag}
-                    count={group.games.length}
-                  />
-                </h3>
-                <div className="border border-base-300 rounded-lg overflow-hidden divide-y divide-base-300">
-                  {group.games.map((game) => (
-                    <GameRow
-                      key={game.id}
-                      game={getGameWithLocalVotes(game)}
-                      isLoggedIn={isLoggedIn}
-                      userId={userId}
-                      isAdmin={isAdmin}
-                      onVote={(channelId, voteType) => handleVote(game.id, channelId, voteType)}
-                      onVoteSettled={() => clearLocalVotes(game.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <GameList
+            games={withoutBroadcast}
+            isLoggedIn={isLoggedIn}
+            userId={userId}
+            isAdmin={isAdmin}
+            localVotes={localVotes}
+            onVote={handleVote}
+            onVoteSettled={clearLocalVotes}
+          />
         ) : (
-          <p className="text-sm text-base-content/60">
+          <p className="text-sm text-base-content/50 pt-6">
             {query.trim() ? `Nenhum outro jogo corresponde a "${query}".` : "Nenhum outro jogo registrado para este dia."}
           </p>
         )}
@@ -262,18 +274,5 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
 
       {showCreateModal && <CreateGameModal onClose={() => setShowCreateModal(false)} />}
     </>
-  );
-}
-
-type LeagueHeaderProps = { league: string; countryName: string; countryFlag: string | null; count: number };
-
-function LeagueHeader({ league, countryName, countryFlag }: LeagueHeaderProps) {
-  return (
-    <span className="flex items-center gap-1.5">
-      {countryFlag ? (
-        <Image src={countryFlag} alt={countryName} width={16} height={12} className="object-cover rounded-sm shrink-0" />
-      ) : null}
-      <span>{league}</span>
-    </span>
   );
 }
