@@ -64,7 +64,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" data-theme="rugbynatv">
       <body className="antialiased flex flex-col min-h-screen">
         <FilterProvider>
           <Header />
