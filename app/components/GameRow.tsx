@@ -41,7 +41,6 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
   const hasOfficialChannels = game.channels.length > 0;
   const isEventGame = game.homeTeamName === "" && game.awayTeamName === "";
   const votedChannels = game.allChannels.filter((c) => c.upvoteCount > 0 || c.downvoteCount > 0);
-  const competition = game.countryName ? `${game.countryName} · ${game.leagueName}` : game.leagueName;
 
   return (
     <>
@@ -53,22 +52,16 @@ export default function GameRow({ game, isLoggedIn, userId, isAdmin, onVote, onV
             <span className="font-semibold text-[15px] tracking-tight">{game.leagueName}</span>
           </div>
         ) : (
-          <>
-            <div className="flex items-center gap-2 flex-[1.4] min-w-[220px]">
-              <TeamLogo name={game.homeTeamName} logo={game.homeTeamLogo} size="sm" />
-              <span className="font-semibold text-[15px] tracking-tight truncate max-w-[110px]">{game.homeTeamName}</span>
-              {game.scoresHome !== null && <span className="font-bold tabular-nums shrink-0">{game.scoresHome}</span>}
-              <span className="text-base-content/25 text-sm px-0.5 shrink-0">&times;</span>
-              {game.scoresAway !== null && <span className="font-bold tabular-nums shrink-0">{game.scoresAway}</span>}
-              <TeamLogo name={game.awayTeamName} logo={game.awayTeamLogo} size="sm" />
-              <span className="font-semibold text-[15px] tracking-tight truncate max-w-[110px]">{game.awayTeamName}</span>
-            </div>
-
-            <div className="flex items-center gap-2 flex-1 min-w-[130px]">
-              <span className="text-[10.5px] tracking-[0.1em] uppercase text-base-content/45 leading-tight">{competition}</span>
-              {isCommunityGame && <span className="badge badge-warning badge-xs shrink-0">Comunidade</span>}
-            </div>
-          </>
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <TeamLogo name={game.homeTeamName} logo={game.homeTeamLogo} size="sm" />
+            <span className="font-semibold text-[15px] tracking-tight truncate min-w-0 shrink">{game.homeTeamName}</span>
+            {game.scoresHome !== null && <span className="font-bold tabular-nums shrink-0">{game.scoresHome}</span>}
+            <span className="text-base-content/25 text-sm px-0.5 shrink-0">&times;</span>
+            {game.scoresAway !== null && <span className="font-bold tabular-nums shrink-0">{game.scoresAway}</span>}
+            <TeamLogo name={game.awayTeamName} logo={game.awayTeamLogo} size="sm" />
+            <span className="font-semibold text-[15px] tracking-tight truncate min-w-0 shrink">{game.awayTeamName}</span>
+            {isCommunityGame && <span className="badge badge-warning badge-xs shrink-0">Comunidade</span>}
+          </div>
         )}
 
         <div className="flex items-center gap-2 shrink-0 ml-auto">

@@ -22,7 +22,7 @@ export default function DateSelector({ selected, onChange }: Props) {
           type="button"
           role="tab"
           onClick={() => onChange(option.value)}
-          className={`text-[12px] tracking-[0.08em] uppercase font-bold rounded-full px-5 py-2 border-[1.5px] whitespace-nowrap transition-colors ${
+          className={`text-[12px] tracking-[0.08em] uppercase font-bold rounded-full px-5 py-2 border-[1.5px] whitespace-nowrap transition-colors cursor-pointer ${
             selected === option.value
               ? "bg-primary text-white border-primary"
               : "bg-white text-base-content/50 border-base-300 hover:border-base-content/30 hover:text-base-content/70"

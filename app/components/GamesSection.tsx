@@ -186,11 +186,11 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
             <div className="text-[12px] tracking-[0.16em] uppercase text-primary mb-2.5">{getDateLabel(selected)}</div>
             <h1 className="m-0 font-extrabold text-[clamp(20px,3vw,27px)] leading-tight tracking-[-0.025em]">{titles[selected]}</h1>
           </div>
-          <div className="flex items-center gap-2 flex-nowrap shrink-0">
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
             <button
               type="button"
               onClick={handleAddGame}
-              className="text-[11.5px] tracking-[0.08em] uppercase font-bold text-primary hover:text-primary/70 transition-colors"
+              className="text-[11.5px] tracking-[0.08em] uppercase font-bold text-primary hover:text-primary/70 transition-colors cursor-pointer"
             >
               + Adicionar jogo
             </button>
@@ -250,7 +250,7 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
           <button
             type="button"
             onClick={handleAddGame}
-            className="text-[11.5px] tracking-[0.08em] uppercase font-bold text-primary hover:text-primary/70 transition-colors"
+            className="text-[11.5px] tracking-[0.08em] uppercase font-bold text-primary hover:text-primary/70 transition-colors cursor-pointer"
           >
             + Adicionar jogo
           </button>
