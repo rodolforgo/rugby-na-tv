@@ -22,20 +22,28 @@ const TEAM_NAME_TRANSLATIONS: Record<string, string> = {
   "áfrica do sul": "south africa",
   "africa do sul": "south africa",
   "estados unidos": "united states",
+  usa: "united states",
   brasil: "brazil",
   rússia: "russia",
   quênia: "kenya",
   kênia: "kenya",
+  "país de gales": "wales",
+  "pais de gales": "wales",
 };
 
 export function translateTeamName(name: string): string {
-  const base = name
+  const normalized = name
     .toLowerCase()
     .trim()
     .replace(/\s+w$/, "")
     .trim()
     .replace(/\bsub[-\s]?(\d+)\b/g, "u$1");
-  return TEAM_NAME_TRANSLATIONS[base] ?? base;
+
+  const suffixMatch = normalized.match(/(\s+u\d+)$/);
+  const ageSuffix = suffixMatch ? suffixMatch[1].trim() : "";
+  const base = ageSuffix ? normalized.slice(0, -(suffixMatch?.[0].length ?? 0)).trim() : normalized;
+  const translated = TEAM_NAME_TRANSLATIONS[base] ?? base;
+  return ageSuffix ? `${translated} ${ageSuffix}` : translated;
 }
 
 export function tokenMatch(a: string, b: string): boolean {
