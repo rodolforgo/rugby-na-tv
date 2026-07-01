@@ -9,30 +9,32 @@ const TEAM_NAME_TRANSLATIONS: Record<string, string> = {
   escocia: "scotland",
   inglaterra: "england",
   austrália: "australia",
-  australia: "australia",
   "nova zelândia": "new zealand",
   "nova zelandia": "new zealand",
-  argentina: "argentina",
   japão: "japan",
   japao: "japan",
-  fiji: "fiji",
-  samoa: "samoa",
-  tonga: "tonga",
   namíbia: "namibia",
-  namibia: "namibia",
   uruguai: "uruguay",
   canadá: "canada",
-  canada: "canada",
-  romania: "romania",
   romênia: "romania",
   geórgia: "georgia",
-  georgia: "georgia",
   espanha: "spain",
-  portugal: "portugal",
+  "áfrica do sul": "south africa",
+  "africa do sul": "south africa",
+  "estados unidos": "united states",
+  brasil: "brazil",
+  rússia: "russia",
+  quênia: "kenya",
+  kênia: "kenya",
 };
 
 export function translateTeamName(name: string): string {
-  const base = name.toLowerCase().trim().replace(/\s+w$/, "").trim();
+  const base = name
+    .toLowerCase()
+    .trim()
+    .replace(/\s+w$/, "")
+    .trim()
+    .replace(/\bsub[-\s]?(\d+)\b/g, "u$1");
   return TEAM_NAME_TRANSLATIONS[base] ?? base;
 }
 
