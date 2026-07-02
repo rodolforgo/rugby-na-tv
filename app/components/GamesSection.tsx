@@ -228,7 +228,7 @@ export default function GamesSection({ games, isLoggedIn, userId, isAdmin }: Pro
         <section className="max-w-5xl mx-auto px-6 pb-8">
           <div className="mb-6">
             <div className="text-[12px] tracking-[0.16em] uppercase text-primary mb-2.5">{getDateLabel("tomorrow")}</div>
-            <h2 className="font-extrabold text-[clamp(22px,4vw,36px)] leading-tight tracking-[-0.025em]">{titles.tomorrow}</h2>
+            <h2 className="font-extrabold text-[clamp(20px,3vw,27px)] leading-tight tracking-[-0.025em]">{titles.tomorrow}</h2>
           </div>
           <div className="border-t-2 border-base-content">
             <GameList
